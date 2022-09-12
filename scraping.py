@@ -1,10 +1,10 @@
 """Functions for scraping and information collection."""
-import imghdr
 import json
+from re import L
 import requests
-import pathlib
 from pathlib import Path
 from bs4 import BeautifulSoup
+from utils import save_label_releases, add_releases, parse_album_info
 
 def get_label_urls():
     """Return the dictionary of label urls."""
@@ -42,14 +42,15 @@ def scrape_label_releases(label_url):
 
 def get_local_albums(label_name):
     """Get the list of album infos stored locally."""
-    album_info_path = Path('.') / 'data' / label_name + '.json'
+    release_info_path = Path('.') / 'data' / (label_name + '.json')
     local_album_infos = [] 
-    if album_info_path.is_file():
-        with open(album_info_path, 'r') as f:
+    if release_info_path.is_file():
+        with open(release_info_path, 'r') as f:
             local_album_infos = json.load(f)
     
     return local_album_infos
-        
+
+ 
 def get_label_page(label_name, album_num=10, refresh=False):
     """Return the list of label releases given label name."""
     # Get label->url dictionary
@@ -63,10 +64,15 @@ def get_label_page(label_name, album_num=10, refresh=False):
     # Get the list of album info from label url
     web_album_infos = scrape_label_releases(label_url)
     
+    # Check whether the requested album num is too long
+    if album_num > len(web_album_infos):
+        raise ValueError(f"Requested album number is too large: {album_num}")
+    
     # Get local album informations
     local_album_infos = get_local_albums(label_name)
     
     albums = []
+    apply_local_info = False
     for i, album in enumerate(web_album_infos):
         if i == album_num: 
             break
@@ -76,44 +82,26 @@ def get_label_page(label_name, album_num=10, refresh=False):
         album_name = album_text[0].strip()
         
         # Check whether the album info has been stored locally
-        if album_name == local_album_infos[0]['album_name']:
+        if len(local_album_infos) and\
+                album_name == local_album_infos[0]['album_name']:
+            if len(local_album_infos) > 1:
+                add_releases(label_name, albums, local_album_infos[1:])
+            else:
+                add_releases(label_name, albums, [])
+                
             albums = albums + local_album_infos[:album_num - i]
-            # TODO: Store new album info locally
+            apply_local_info = True
             break
         
-        # Parse album info
-        try:
-            album_link = album.find('a')['href']
-            # Judge whether the link is relative
-            if album_link[0] != 'h':
-                album_link = label_url + album_link[1:]
-
-            # Cover
-            img_item = album.find('img')
-            # Detect lazy image source url
-            if 'data-original' in img_item.attrs:
-                img_url = img_item['data-original']
-            else:
-                img_url = img_item['src']
-                
-            # Artist name
-            if len(album_text) > 1:
-                artist_name = album_text[2].get_text().strip()
-            else:
-                artist_name = ""
-        except:
-            print(f"Error parsing album {i}")
-        
-        albums.append(
-            {
-                'album_url': album_link,
-                'cover_img_url': img_url,
-                'album_name': album_name,
-                'artist_name': artist_name,
-                # TODO: Add more album info
-            }
-        )
+        extracted_album_info = parse_album_info(
+            label_url, album, album_text=album_text, album_name=album_name)
+        albums.append(extracted_album_info)
     
-    # TODO: Store new album info locally (if any)
+    if not apply_local_info:
+        save_label_releases(label_name, 
+                            label_url, 
+                            albums, 
+                            web_album_infos, 
+                            local_album_infos)
     
     return albums

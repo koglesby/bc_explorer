@@ -1,3 +1,6 @@
 .vscode
 *.html
 out
+data/
+__pycache__/
+test.py
