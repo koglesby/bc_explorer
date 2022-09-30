@@ -1,10 +1,9 @@
 """Functions for scraping and information collection."""
 import json
-from re import L
 import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
-from utils import save_label_releases, add_releases, parse_album_info
+from utils import add_new_releases, save_releases, parse_album_info
 
 def get_label_urls():
     """Return the dictionary of label urls."""
@@ -84,12 +83,14 @@ def get_label_page(label_name, album_num=10, refresh=False):
         # Check whether the album info has been stored locally
         if len(local_album_infos) and\
                 album_name == local_album_infos[0]['album_name']:
-            if len(local_album_infos) > 1:
-                add_releases(label_name, albums, local_album_infos[1:])
+            # Add new releases (if any) to local info if no older releases are requested
+            if i + len(local_album_infos) >= album_num:
+                if len(albums):
+                    save_releases(label_name, albums, local_album_infos)
+                albums = albums + local_album_infos[:album_num - i]
             else:
-                add_releases(label_name, albums, [])
-                
-            albums = albums + local_album_infos[:album_num - i]
+                albums = albums + local_album_infos
+
             apply_local_info = True
             break
         
@@ -97,11 +98,33 @@ def get_label_page(label_name, album_num=10, refresh=False):
             label_url, album, album_text=album_text, album_name=album_name)
         albums.append(extracted_album_info)
     
+    # In case none release info is fetched from cache, 
+    # add all potential new releases to local data
     if not apply_local_info:
-        save_label_releases(label_name, 
-                            label_url, 
-                            albums, 
-                            web_album_infos, 
+        if len(local_album_infos):
+            add_new_releases(label_name,
+                            label_url,
+                            albums,
+                            web_album_infos,
                             local_album_infos)
+        else:
+            save_releases(label_name, albums, [])
+        
+    # Check whether current data covers the oldest info requested
+    if len(albums) < album_num:
+        # Parse older releases than local data
+        tail_albums = []
+        for i in range(len(albums), album_num):
+            album_text = web_album_infos[i].find('p').contents
+            album_name = album_text[0].strip()
+            extracted_album_info = parse_album_info(
+                label_url, web_album_infos[i],
+                album_text=album_text, album_name=album_name)
+            tail_albums.append(extracted_album_info)
+        
+        # Add older releases to local data
+        save_releases(label_name, albums, tail_albums)
+        
+        albums += tail_albums
     
     return albums

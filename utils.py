@@ -65,15 +65,16 @@ def save_label_url(label_name, url):
         json.dump(label_urls, fw)
 
 
-def add_releases(label_name, new_releases, old_releases):
-    """Directly add parsed new releases to local data."""
+def save_releases(label_name, new_releases, old_releases):
+    """Concatenate new and old releases and add them to local data."""
     release_info_path = Path('.') / 'data' / (label_name + '.json')
     with open(release_info_path, 'w') as fw:
         label_releases = new_releases + old_releases
         json.dump(label_releases, fw)
+    print("Releases saved")
 
 
-def save_label_releases(
+def add_new_releases(
         label_name, label_url, new_releases, web_album_info, old_releases):
     """Add all the new release info to local data."""
     release_info_path = Path('.') / 'data' / (label_name + '.json')
@@ -102,3 +103,5 @@ def save_label_releases(
 
     with open(release_info_path, 'w') as fw:
         json.dump(label_releases, fw)
+    
+    print("New releases added")
