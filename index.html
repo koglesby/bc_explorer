@@ -1,38 +1,40 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns="">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=, initial-scale=1.0">
-    <title>Flask Vue app</title>
+    <title>Bandcamp Explorer</title>
     <!--- import libraries --->
     <!--- bootstrap --->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!--- vue js --->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.10/dist/vue.js"></script>
 
 </head>
+
 <style>
-    .card-img-top{
-        height: 200px,
-        width: 100%,
+    .card-img-top {
+        height: 200px;
+        width: 100%;
         object-fit: cover;
     }
-    .container{
+
+    .container {
         margin-top: 200px;
     }
 </style>
+
 <body>
     <div id="app">
         <nav class="navbar fixed-top navbar-dark bg-dark">
-          <!-- Navbar content -->
+            <!-- Navbar content -->
             <a class="navbar-brand text-light">Authors</a>
             <form class="form-inline">
                 <input class="form-control mr-sm-2" placeholder="Search" v-model="search">
-                <button
-                    class="btn btn-outline-success my-2 my-sm-0"
-                    @click="filterAuthors"
-                >Search</button>
+                <button class="btn btn-outline-success my-2 my-sm-0" @click="filterAuthors">Search</button>
             </form>
         </nav>
 
@@ -45,24 +47,26 @@
                     :image="images[author]"
                     :quotes="quotes[author]"
                 >
-
                 </author-card>
             </div>
         </div>
     </div>
 </body>
+
 <script>
     Vue.component('author-card', {
         props: ['author', 'image', 'quotes'],
         data(){
-            return{ showQuotes: false }
+            return { 
+                showQuotes: false
+            }
         },
         methods:{
             toggleShow(){
                 this.showQuotes = !this.showQuotes;
             }
         },
-        template: '
+        template: `
                 <div class="card">
                     <img class="card-img-top" src="image" alt="Card image cap">
                     <div class="card-body">
@@ -79,46 +83,45 @@
                       </ul>
                     </div>
                 </div>
-        '
-    })
+                `
+    });
     new Vue({
         el: '#app',
-        async created(){
-            const url ="http://127.0.0.1:5000/"
+        async created() {
+            const url = "http://127.0.0.1:5000/"
             const response = await fetch(url)
             const data = await response.json()
             this.authors = data.authors
             this.displayedAuthors = this.authors
             this.quotes = data.quotes
             this.images = data.images
-        }
-        data(){
-            return{
+        },
+        data() {
+            return {
                 authors: [],
                 displayedAuthors: [],
                 quotes: {},
-                images: {}
+                images: {},
                 search: ''
             }
-        }
-        methods:{
-            filterAuthors(event){
+        },
+        methods: {
+            filterAuthors(event) {
                 event.preventDefault()
                 const matches = []
                 this.displayedAuthors = []
-                this.authors.forEach(authorList =>{
-                    authorList.forEach(author =>}
+                this.authors.forEach(authorList => {
+                    authorList.forEach(author => {
                         const authorMatch = author.toLowerCase().startsWith(this.search.toLowerCase())
-                        ||
-                        author.toLowerCase().endsWith(this.search.toLowerCase())
-                        if (authorMatch){
+                            || author.toLowerCase().endsWith(this.search.toLowerCase())
+                        if (authorMatch) {
                             matches.push(author)
                         }
                     })
                 })
-
             }
         }
     })
 </script>
+
 </html>
