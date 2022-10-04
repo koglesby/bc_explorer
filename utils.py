@@ -16,7 +16,7 @@ def parse_album_info(
         album_link = raw_album_info.find('a')['href']
         # Judge whether the link is relative
         if album_link[0] != 'h':
-            album_link = label_url + album_link[1:]
+            album_link = label_url + album_link
 
         # Cover
         img_item = raw_album_info.find('img')
