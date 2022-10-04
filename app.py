@@ -1,32 +1,55 @@
-from flask import Flask, jsonify
+from crypt import methods
+from flask import Flask, jsonify, request, abort, Response
 from flask_cors import CORS
 from scraping import get_label_page
-import json
+from utils import save_label_url
 
 app = Flask(__name__)
 CORS(app)
 
-# def load_data(filename):
-# 	with open(filename, 'r') as f:
-# 		return json.load(f)
-
-# def load_dicts():
-# 	return load_data('images.json'), load_data('quotes.json')
-
-# def clear_nulls():
-# 	images, quotes = load_dicts()
-# 	new_images = {}
-# 	new_quotes = {}
-# 	for author in images.keys():
-# 		if images[author]:
-# 			new_images[author] = images[author]
-# 			new_quotes[author] = quotes[author]
-# 	return new_images, new_quotes
-
-# def create_authors_list(authors):
-# 	step = 3
-# 	return [authors[i:i+step] for i in range(0, len(authors), step)]
 
 @app.route("/")
+def get_homepage():
+    """Get homepage info."""
+    # TODO: Homepage info
+    pass
+
+
+@app.route("/labels/", methods=['GET'])
 def get_label_releases():
-	return jsonify(get_label_page("SVBKVLT", album_num=20))
+    """Get label releases based on label name."""
+    try:
+        label_name = request.args.get("label_name", default="", type=str)
+        album_num = request.args.get("album_num", default=10, type=int)
+    except:
+        abort(400, "Cannot parse label name and album num from request.")
+        
+    try:
+        releases = get_label_page(label_name=label_name, album_num=album_num)
+    except (ValueError, KeyError) as vke:
+        abort(400, str(vke))
+    except Exception as e:
+        abort(503, str(e)) 
+    
+    return jsonify(releases)
+
+
+@app.route("/labels/", methods=['POST'])
+def enter_label_url():
+    """Save a label and its url entered by user."""
+    try:
+        label_name = request.json['label_name']
+        label_url = request.json['label_url']
+    except:
+        abort(400, "Cannot parse label name and url from request from.")
+
+    try:
+        save_label_url(label_name=label_name, url=label_url)
+    except Exception as e:
+        abort(503, str(e))
+    
+    resp_dict = {
+        "label_name": label_name,
+        "label_url": label_url,
+    }
+    return resp_dict, 200
