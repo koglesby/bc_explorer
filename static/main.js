@@ -1,7 +1,7 @@
 Vue.component('labels_container', {
   data() {
     return {
-      labels: [],
+      label_data: {},
     };
   },
   async created() {
@@ -13,21 +13,21 @@ Vue.component('labels_container', {
         return response.json();
       })
       .then((data) => {
-        this.labels = Object.keys(data);
+        this.label_data = data;
       })
       .catch((error) => console.log(error));
   },
   template: `
     <div class="labels_container">
-      <div v-for="label, idx in labels" :key="idx">
-        <label-releases :label_name="label"></label-releases>
+      <div v-for="(label_url, label_name, index) in label_data">
+        <label-releases :label_name="label_name" :label_url="label_url"></label-releases>
       </div>
     </div>
   `,
 });
 
 Vue.component('label-releases', {
-  props: ['label_name'],
+  props: ['label_name', 'label_url'],
   data() {
     return {
       releases: [],
@@ -78,7 +78,9 @@ Vue.component('label-releases', {
   },
   template: `
     <div class="container">
-      <h2>{{this.label_name}}</h2>
+      <a :href="label_url">
+        <h2>{{this.label_name}}</h2>
+      </a>
       <ul class="control" :class="['custom-control-' + this.label_name.replace(/ /g, '')]" >
         <li class="prev">
           <i class="fas fa-angle-left fa-2x"></i>
