@@ -57,14 +57,9 @@
       <input class="form-control mr-sm-2" placeholder="Label URL" v-model="enter_label_url">
       <button class="btn btn-outline-success my-2 my-sm-0" @click="addLabelURL">Add Label</button>
     </div>
-    <div class="labels_container">
-      <label-releases label_name="SVBKVLT"></label-releases>
-      <label-releases label_name="GD4YA"></label-releases>
-      <label-releases label_name="The Flenser"></label-releases>
-    </div>
+    <labels_container></labels_container>
   </div>
 
-  
 </div>
 </body>
   <script type="text/javascript" src="{{ url_for('static', filename='main.js')}}"></script>

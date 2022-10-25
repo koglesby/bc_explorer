@@ -1,7 +1,7 @@
 from crypt import methods
 from flask import Flask, jsonify, request, abort, Response, render_template
 from flask_cors import CORS
-from scraping import get_label_page
+from scraping import get_label_page, get_label_urls
 from utils import save_label_url
 
 app = Flask(__name__)
@@ -11,9 +11,6 @@ CORS(app)
 @app.route("/")
 def get_homepage():
     return render_template('index.html')
-    # """Get homepage info."""
-    # # TODO: Homepage info
-    # pass
 
 
 @app.route("/labels/", methods=['GET'])
@@ -33,6 +30,19 @@ def get_label_releases():
         abort(503, str(e))
 
     return jsonify(releases)
+
+
+@app.route("/all_labels", methods=['GET'])
+def get_all_labels():
+    try:
+        label_stuff = get_label_urls()
+        label_data = jsonify(label_stuff)
+    except (ValueError, KeyError) as vke:
+        abort(400, str(vke))
+    except Exception as e:
+        abort(503, str(e))
+
+    return label_data
 
 
 @app.route("/labels/", methods=['POST'])

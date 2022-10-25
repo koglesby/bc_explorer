@@ -1,3 +1,31 @@
+Vue.component('labels_container', {
+  data() {
+    return {
+      labels: [],
+    };
+  },
+  async created() {
+    const url = 'http://127.0.0.1:5000/all_labels';
+
+    fetch(url, { credentials: 'same-origin' })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        return response.json();
+      })
+      .then((data) => {
+        this.labels = Object.keys(data);
+      })
+      .catch((error) => console.log(error));
+  },
+  template: `
+    <div class="labels_container">
+      <div v-for="label, idx in labels" :key="idx">
+        <label-releases :label_name="label"></label-releases>
+      </div>
+    </div>
+  `,
+});
+
 Vue.component('label-releases', {
   props: ['label_name'],
   data() {
