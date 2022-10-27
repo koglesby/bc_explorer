@@ -122,6 +122,65 @@ Vue.component('release-card', {
     `,
 });
 
+Vue.component('search_bar', {
+  data() {
+    return {
+      enter_search_term: '',
+      search_res_data: [],
+    };
+  },
+  template: `
+  <div class="search_enter">
+    <input class="form-control mr-sm-2" placeholder="Search" @keyup.enter="useSearch" v-model="enter_search_term">
+    <button class="btn btn-outline-success my-2 my-sm-0" @click="useSearch">Search</button>
+    <div v-for='n in search_res_data'>
+    <a  href="/"  @click="clickAddLabel(n.name, n.url)">{{n.name}}</a>
+    </div>
+  </div>
+  `,
+  methods: {
+    useSearch() {
+      const url = 'http://127.0.0.1:5000/search/';
+      fetch(url, {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          search_term: this.enter_search_term,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json();
+        })
+        .then((data) => {
+          this.search_res_data = data;
+        })
+        .catch((error) => console.log(error));
+    },
+    clickAddLabel(name, label_url) {
+      const url = 'http://127.0.0.1:5000/labels/';
+      fetch(url, {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          label_name: name,
+          label_url,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json();
+        })
+        .then((data) => {})
+        .catch((error) => console.log(error));
+    },
+  },
+});
+
 new Vue({
   el: '#app',
   // async created() {
@@ -134,6 +193,7 @@ new Vue({
     return {
       enter_label_name: '',
       enter_label_url: '',
+      enter_search_term: 'search',
     };
   },
   methods: {

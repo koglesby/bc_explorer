@@ -1,7 +1,7 @@
 from crypt import methods
 from flask import Flask, jsonify, request, abort, Response, render_template
 from flask_cors import CORS
-from scraping import get_label_page, get_label_urls
+from scraping import get_label_page, get_label_urls, scrape_search
 from utils import save_label_url
 
 app = Flask(__name__)
@@ -64,3 +64,19 @@ def enter_label_url():
         "label_url": label_url,
     }
     return resp_dict, 200
+
+
+@app.route("/search/", methods=['POST'])
+def useSearch():
+    """Search for a label or artist"""
+    try:
+        search_term = request.json['search_term']
+    except:
+        abort(400, "Cannot parse search term")
+
+    try:
+        search_res = scrape_search(search_term=search_term)
+    except Exception as e:
+        abort(503, str(e))
+
+    return search_res, 200
