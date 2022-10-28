@@ -31,10 +31,13 @@ Vue.component('label-releases', {
   data() {
     return {
       releases: [],
+      elId: '',
     };
   },
   async created() {
-    const url =
+    this.elId = 'elId-' + Date.now();
+
+    let url =
       'http://127.0.0.1:5000/labels?label_name=' +
       this.label_name +
       '&album_num=10';
@@ -51,7 +54,7 @@ Vue.component('label-releases', {
   },
   updated() {
     tns({
-      container: `.${this.label_name.replace(/ /g, '')}`,
+      container: `#${this.elId}`,
       items: 3,
       gutter: 10,
       slideBy: 1,
@@ -60,7 +63,7 @@ Vue.component('label-releases', {
       mouseDrag: true,
       autoplay: true,
       autoplayButtonOutput: false,
-      controlsContainer: '.custom-control-' + this.label_name.replace(/ /g, ''),
+      controlsContainer: `#custom-control-${this.elId}`,
       responsive: {
         0: {
           items: 1,
@@ -81,7 +84,7 @@ Vue.component('label-releases', {
       <a :href="label_url">
         <h2>{{this.label_name}}</h2>
       </a>
-      <ul class="control" :class="['custom-control-' + this.label_name.replace(/ /g, '')]" >
+      <ul class="control" :id="['custom-control-' + this.elId]" >
         <li class="prev">
           <i class="fas fa-angle-left fa-2x"></i>
         </li>
@@ -89,7 +92,7 @@ Vue.component('label-releases', {
           <i class="fas fa-angle-right fa-2x"></i>
         </li>
       </ul>
-      <div :class="[this.label_name.replace(/ /g, '')]">
+      <div :id="[this.elId]">
         <div v-for="release, idx in releases" :key="idx">
           <release-card
               :key="release.album_name"
