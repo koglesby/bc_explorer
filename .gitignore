@@ -1,6 +1,8 @@
-.vscode
-out
 data/
-__pycache__/
 test.py
-venv
+venv/
+.DS_Store
+node_modules/
+/dist/
+__pycache__
+env/
