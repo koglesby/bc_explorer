@@ -5,6 +5,21 @@ import json
 from pathlib import Path
 
 
+def deleteArtLab(label_name):
+    url_filepath = Path('./data/label_urls.json')
+
+    if url_filepath.is_file():
+        with open(url_filepath, 'r') as f:
+            label_urls = json.load(f)
+            label_urls.pop(label_name)
+
+        # Save json file
+        with open(url_filepath, 'w') as fw:
+            json.dump(label_urls, fw)
+
+    return label_urls
+
+
 def parse_album_info(
         label_url, raw_album_info, album_text=None, album_name=None):
     """Parse and return detailed album info from raw html."""
@@ -79,29 +94,29 @@ def add_new_releases(
     """Add all the new release info to local data."""
     release_info_path = Path('.') / 'data' / (label_name + '.json')
 
-    assert(len(new_releases) <= len(web_album_info))
+    assert (len(new_releases) <= len(web_album_info))
 
     label_releases = []
     label_releases += new_releases
-    
+
     # Get the missing release info between new and old releases
     for i in range(len(new_releases), len(web_album_info)):
         album = web_album_info[i]
-        
+
         album_text = album.find('p').contents
         album_name = album_text[0].strip()
-        
+
         # Check whether the album info has been stored locally
         if len(old_releases) and\
-                album_name == old_releases[0]['album_name']:                
+                album_name == old_releases[0]['album_name']:
             label_releases += old_releases
             break
-        
+
         extracted_album_info = parse_album_info(
             label_url, album, album_text=album_text, album_name=album_name)
         label_releases.append(extracted_album_info)
 
     with open(release_info_path, 'w') as fw:
         json.dump(label_releases, fw)
-    
+
     print("New releases added")

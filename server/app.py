@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 from crypt import methods
 from scraping import get_label_page, get_label_urls, scrape_search
-from utils import save_label_url
+from utils import save_label_url, deleteArtLab
 
 # configuration
 DEBUG = True
@@ -49,24 +49,36 @@ def get_all_labels():
     return label_data
 
 
-@app.route("/labels/", methods=['POST'])
+@app.route("/labels/", methods=['POST', 'DELETE'])
 def enter_label_url():
     """Save a label and its url entered by user."""
-    try:
-        label_name = request.json['label_name']
-        label_url = request.json['label_url']
-    except:
-        abort(400, "Cannot parse label name and url from request from.")
+    if request.method == 'POST':
+        try:
+            label_name = request.json['label_name']
+            label_url = request.json['label_url']
+        except:
+            abort(400, "Cannot parse label name and url from request from.")
 
-    try:
-        save_label_url(label_name=label_name, url=label_url)
-    except Exception as e:
-        abort(503, str(e))
+        try:
+            save_label_url(label_name=label_name, url=label_url)
+        except Exception as e:
+            abort(503, str(e))
 
-    resp_dict = {
-        "label_name": label_name,
-        "label_url": label_url,
-    }
+        resp_dict = {
+            "label_name": label_name,
+            "label_url": label_url,
+        }
+    if request.method == 'DELETE':
+        try:
+            label_name = request.json['label_name']
+            label_urls_obj = deleteArtLab(label_name)
+        except Exception as e:
+            abort(503, str(e))
+
+        resp_dict = {
+            "label_urls": label_urls_obj
+        }
+
     return resp_dict, 200
 
 

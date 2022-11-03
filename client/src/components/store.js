@@ -2,9 +2,9 @@ import { reactive } from 'vue'
 
 export const store = reactive({
   labelData: {},
-//   loadLabels(data) {
-//     this.labelData = data;
-//   },
+  loadLabels(data) {
+    this.labelData = data;
+  },
 //   addNewLabel(newData) {
 //     this.labelData = { 
 //         ...this.labelData, 
@@ -20,7 +20,7 @@ export const store = reactive({
         return response.json();
       })
       .then((data) => {
-        this.labelData = data;
+        this.loadLabels(data);
       })
       .catch((error) => console.log(error));
   },
@@ -48,4 +48,24 @@ export const store = reactive({
       })
       .catch((error) => console.log(error));
   },
+  deleteLabel(label_name) {
+    const url = 'http://127.0.0.1:5000/labels/';
+    fetch(url, {
+      method: 'DELETE',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({
+        label_name: label_name,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        return response.json();
+      })
+      .then((data) => {
+        this.loadLabels(data.label_urls);
+      })
+      .catch((error) => console.log(error));
+  }
 })
