@@ -23,5 +23,7 @@ export default {
 </script>
 
 <style>
-
+.labels_container {
+  margin-top: 10%;
+}
 </style>

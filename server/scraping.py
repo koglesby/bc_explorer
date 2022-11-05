@@ -20,36 +20,39 @@ def scrape_search(search_term):
         raise Exception(f"Fail to parse html from url")
 
     try:
-        searchresult_entries = doc.find_all(class_='result-info')
-
+        searchresults = doc.find_all(class_='searchresult')
         searchresult_arr = []
-
-        for i, searchresult in enumerate(searchresult_entries):
+        for i, searchresult in enumerate(searchresults):
             if i == 10:
                 break
 
-            # Get the name, url, and itemtype(LABEL or ARTIST) for each search result
-            searchresult_heading = searchresult.find(class_='heading')
-            searchresult_heading_text = searchresult_heading.find('a').contents
-            searchresult_heading_name = searchresult_heading_text[0].strip()
+            result_info = searchresult.find(class_='result-info')
 
-            searchresult_itemurl = searchresult.find(class_='itemurl')
-            searchresult_itemurl_text = searchresult_itemurl.find('a').contents
-            searchresult_itemurl_name = searchresult_itemurl_text[0].strip()
+            search_img = searchresult.find(class_='art').find('img')['src']
 
-            searchresult_itemtype = searchresult.find(class_='itemtype')
-            searchresult_itemtype_text = searchresult_itemtype.contents
-            searchresult_itemtype_name = searchresult_itemtype_text[0].strip()
+            heading_contents = result_info.find(
+                class_='heading').find('a').contents
+            heading = heading_contents[0].strip()
 
-            # Each search result gets its own object
+            itemurl_contents = searchresult.find(
+                class_='itemurl').find('a').contents
+            itemurl = itemurl_contents[0].strip()
+
+            itemtype_contents = searchresult.find(class_='itemtype').contents
+            itemtype = itemtype_contents[0].strip()
+
+            subhead_contents = searchresult.find(class_='subhead').contents
+            subhead = subhead_contents[0].strip()
+
             searchresult_object = {
-                'name': searchresult_heading_name,
-                'url': searchresult_itemurl_name,
-                'itemtype': searchresult_itemtype_name,
+                'name': heading,
+                'url': itemurl,
+                'itemtype': itemtype,
+                'subhead': subhead,
+                'img_src': search_img,
                 'id': uuid.uuid4().hex
             }
 
-            # Add each search result object to an array
             searchresult_arr.append(searchresult_object)
     except:
         raise Exception(f"Fail to find search results from url")

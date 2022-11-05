@@ -1,11 +1,15 @@
 <template>
   <div class="container">
-    <a :href="label_url">
-      <h2>{{ this.label_name }}</h2>
-    </a>
-    <span>
-      <b-button variant="secondary" @click="delButton">Remove</b-button>
-    </span>
+    <div class="wrapper">
+      <div class="followed-name">
+        <a :href="label_url">
+          <h2>{{ this.label_name }}</h2>
+        </a>
+      </div>
+      <div>
+        <b-button variant="secondary" @click="delButton">Unfollow</b-button>
+      </div>
+    </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
       <li class="prev">
         <i class="fas fa-angle-left fa-2x"></i>
@@ -55,8 +59,8 @@ export default {
   updated() {
     tns({
       container: `#${this.elId}`,
-      items: 3,
-      gutter: 10,
+      items: 4,
+      gutter: 30,
       slideBy: 1,
       controlsPosition: 'bottom',
       navPosition: 'bottom',
@@ -66,7 +70,7 @@ export default {
       controlsContainer: `#custom-control-${this.elId}`,
       responsive: {
         0: {
-          items: 1,
+          items: 2,
           nav: false,
         },
         768: {
@@ -74,7 +78,7 @@ export default {
           nav: true,
         },
         1440: {
-          items: 3,
+          items: 4,
         },
       },
     });
@@ -92,6 +96,7 @@ export default {
 .container {
   position: relative;
   margin-top: 3%;
+  padding: 0 !important;
 }
 
 h1 {
@@ -145,5 +150,11 @@ h1 {
 
 .tns-nav .tns-nav-active {
   background-color: black;
+}
+
+.followed-name {
+  float: left;
+  vertical-align: baseline;
+  padding-right: 2em;
 }
 </style>
