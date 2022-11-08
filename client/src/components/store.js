@@ -11,6 +11,8 @@ export const store = reactive({
 //         [newData.label_name]: newData.label_url
 //     }
 //   },
+
+  // GET label data
   getLabelData() {
   const url = "http://127.0.0.1:5000/all_labels";
     fetch(url, { credentials: "same-origin" })
@@ -20,10 +22,12 @@ export const store = reactive({
         return response.json();
       })
       .then((data) => {
+        // use the returned data to update state
         this.loadLabels(data);
       })
       .catch((error) => console.log(error));
   },
+  // POST add a new label/artist
   addNewLabel(name, labelUrl) {
     const url = 'http://127.0.0.1:5000/labels/';
     fetch(url, {
@@ -41,6 +45,7 @@ export const store = reactive({
         return response.json();
       })
       .then((newData) => {
+        // add the recently saved data to the existing state
         this.labelData = { 
             ...this.labelData, 
             [newData.label_name]: newData.label_url
@@ -48,6 +53,7 @@ export const store = reactive({
       })
       .catch((error) => console.log(error));
   },
+  // DELETE delete a label/artist by name
   deleteLabel(label_name) {
     const url = 'http://127.0.0.1:5000/labels/';
     fetch(url, {
@@ -64,6 +70,8 @@ export const store = reactive({
         return response.json();
       })
       .then((data) => {
+        // get back data for the remaining entries
+        // use that data to update the state
         this.loadLabels(data.label_urls);
       })
       .catch((error) => console.log(error));
