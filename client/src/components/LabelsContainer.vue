@@ -1,13 +1,15 @@
 <template>
   <div class="labels_container">
-    <div v-for="(label_url, label_name) in store.labelData" v-bind:key="label_name">
-      <LabelReleases :label_name="label_name" :label_url="label_url"></LabelReleases>
+    <div v-for="(itemData, itemId) in store.firebaseLabelData" v-bind:key="itemId">
+      <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
+      </LabelReleases>
     </div>
   </div>
 </template>
 <script>
 import LabelReleases from './LabelReleases.vue';
 import { store } from './store';
+import { auth } from '../main';
 
 export default {
   data() {
@@ -16,7 +18,12 @@ export default {
     };
   },
   async created() {
-    this.store.getLabelData();
+    auth.onAuthStateChanged(user => {
+      if (!!user) {
+        this.store.getLabelData(user);
+        this.store.fetchUser(user);
+      }
+    })
   },
   components: { LabelReleases }
 }

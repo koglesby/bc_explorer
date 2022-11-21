@@ -2,8 +2,8 @@
   <a :href="url">
     <img class="img-fluid" :src="cover" alt="Cover image cap">
     <div class="card-body">
-        <h5 class="card-title">{{artist}}</h5>
-        <p>{{title}}</p>
+      <h5 class="card-title">{{ artist }}</h5>
+      <p>{{ title }}</p>
     </div>
   </a>
 </template>
@@ -18,4 +18,6 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+
+</style>

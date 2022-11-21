@@ -1,12 +1,26 @@
 <template>
   <b-container fluid="sm" class="fixed-top search-enter">
     <b-row>
-      <b-col offset-lg="8">
+      <b-col sm>
+        <div v-if="store.user.loggedIn">
+          <h6>Welcome, {{ store.user.data.displayName }}</h6>
+          <RouterLink to="/dashboard">Dashboard</RouterLink>
+        </div>
+        <div v-else>
+          <div>
+            <RouterLink to="/login">Login</RouterLink>
+          </div>
+          <div>
+            <RouterLink to="/register">Register</RouterLink>
+          </div>
+        </div>
+      </b-col>
+      <b-col>
         <input type="search" class="nosubmit form-control" placeholder="Search for Label or Artist on Bandcamp..."
           @keyup.enter="useSearch" v-model="enter_search_term">
         <div class="results-container">
           <div v-for='n in search_res_data' v-bind:key="n.id" class="search-result">
-            <div @click="clickAddLabel(n.name, n.url)" v-on-clickaway="away">
+            <div @click="clickAddLabel(n.name, n.url, n.itemtype)" v-on-clickaway="away">
               <b-img thumbnail fluid left :src="n.img_src"></b-img>
               <div class="result-info">
                 <div class="itemtype">
@@ -23,8 +37,6 @@
           </div>
         </div>
       </b-col>
-      <!-- <b-col></b-col> -->
-
     </b-row>
   </b-container>
 </template>
@@ -32,46 +44,50 @@
 <script>
 import { store } from './store'
 import { mixin as clickaway } from 'vue-clickaway';
+import { RouterLink } from 'vue-router';
 
 export default {
   data() {
     return {
       store,
-      enter_search_term: '',
+      enter_search_term: "",
       search_res_data: [],
     };
   },
+  // use clickaway to empty the search response data when user clicks away from component
   mixins: [clickaway],
   methods: {
     away() {
       this.search_res_data = [];
     },
     useSearch() {
-      const url = 'http://127.0.0.1:5000/search/';
+      const url = "http://127.0.0.1:5000/search/";
       fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: new Headers({
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         }),
         body: JSON.stringify({
           search_term: this.enter_search_term,
         }),
       })
         .then((response) => {
-          if (!response.ok) throw Error(response.statusText);
+          if (!response.ok)
+            throw Error(response.statusText);
           return response.json();
         })
         .then((data) => {
           this.search_res_data = data.search_res;
-          this.enter_search_term = '';
+          this.enter_search_term = "";
         })
         .catch((error) => console.log(error));
     },
-    clickAddLabel(name, labelUrl) {
-      this.store.addNewLabel(name, labelUrl);
+    clickAddLabel(name, labelUrl, itemtype) {
+      this.store.addNewLabel(name, labelUrl, itemtype);
       this.search_res_data = [];
     },
   },
+  components: { RouterLink }
 }
 </script>
 
@@ -122,7 +138,6 @@ input.nosubmit {
   margin-left: 1.3em;
   line-height: 1em;
 }
-
 
 .search-result:hover {
   background-color: rgba(212, 248, 255, 0.97);

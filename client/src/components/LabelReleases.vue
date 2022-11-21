@@ -5,10 +5,11 @@
         <a :href="label_url">
           <h2>{{ this.label_name }}</h2>
         </a>
+        <span>
+          <h6>{{ this.itemtype }}</h6>
+        </span>
       </div>
-      <div>
-        <b-button variant="secondary" @click="delButton">Unfollow</b-button>
-      </div>
+      <b-button class="unfollow" variant="secondary" @click="delButton">Unfollow</b-button>
     </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
       <li class="prev">
@@ -34,7 +35,7 @@ import { tns } from "../../node_modules/tiny-slider/src/tiny-slider";
 import { store } from './store';
 
 export default {
-  props: ['label_name', 'label_url'],
+  props: ['label_name', 'label_url', 'itemtype'],
   data() {
     return {
       releases: [],
@@ -43,16 +44,23 @@ export default {
   },
   async created() {
     this.elId = `elId-${Date.now()}`;
-    const url = `http://127.0.0.1:5000/labels?label_name=${this.label_name}&album_num=10`;
-    fetch(url, { credentials: 'same-origin' })
+
+    const url = 'http://127.0.0.1:5000/get_releases/';
+    fetch(url, {
+      method: 'POST',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({
+        url: this.label_url
+      })
+    })
       .then((response) => {
-        if (!response.ok) {
-          throw Error(response.statusText);
-        }
+        if (!response.ok) throw Error(response.statusText);
         return response.json();
       })
       .then((data) => {
-        this.releases = data;
+        this.releases = data.releases;
       })
       .catch((error) => console.log(error));
   },
@@ -85,7 +93,7 @@ export default {
   },
   methods: {
     delButton() {
-      store.deleteLabel(this.label_name);
+      store.deleteLabel(this.label_url);
     }
   },
   components: { ReleaseCard },
@@ -153,7 +161,6 @@ h1 {
 }
 
 .followed-name {
-  float: left;
   vertical-align: baseline;
   padding-right: 2em;
 }

@@ -14,7 +14,11 @@ export default {
     return {};
   },
   components: { LabelsContainer, SearchBar },
-  methods: {},
+  methods: {
+    clickHello() {
+      this.$router.push('/dashboard')
+    }
+  },
 };
 </script>
 

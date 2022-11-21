@@ -1,79 +1,132 @@
 import { reactive } from 'vue'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { auth, db } from '../main';
+import { ref, set, child, push, update, query, orderByChild, equalTo, onValue, remove } from "firebase/database";
 
+// https://firebase.google.com/docs/database/web/read-and-write 
 export const store = reactive({
-  labelData: {},
-  loadLabels(data) {
-    this.labelData = data;
+  user: {
+    loggedIn: null,
+    data: null
   },
-//   addNewLabel(newData) {
-//     this.labelData = { 
-//         ...this.labelData, 
-//         [newData.label_name]: newData.label_url
-//     }
-//   },
+  firebaseLabelData: {},
+  // AUTH -> state
+  SET_USER(data) {
+    this.user.data = data;
+  },
+  SET_LOGGED_IN(value) {
+    this.user.loggedIn = value
+  },
+  async register({ email, password, name}){
+      const response = await createUserWithEmailAndPassword(auth, email, password)
+      if (response) {
+          this.SET_USER(response.user);
+          updateProfile(response.user, {displayName: name})
+          set(ref(db, 'users/' + userId), {
+            username: name,
+            email: email,
+          });
+      } else {
+          throw new Error('Unable to register user')
+      }
+  },    
+  // Existing and future Auth states are persisted after closing browser window
+  async logIn({ email, password }){    
+    const response = await setPersistence(auth, browserLocalPersistence)
+      .then(() => {
+        return signInWithEmailAndPassword(auth, email, password);
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+    if (response) {
+      this.SET_USER(response.user);
+    } else {
+        throw new Error('login failed')
+    }
+  },
+  async logOut(){
+    await signOut(auth)
+    this.SET_USER(null)
+  },
+  async fetchUser(user) {
+    this.SET_LOGGED_IN(user !== null);
+    if (user) {
+      this.SET_USER({displayName: user.displayName, email: user.email})
+    } else {
+      this.SET_USER(null)
+    }
+  },
+  // get the user's saved Artists/Labels
+  getLabelData(user) {
+    const myUserId = user.uid;
+    const userItemRef = query(ref(db, 'users/' + myUserId), orderByChild('url'));
+    // check the db to see if the current user has an item (artist or label) with the same url
+    onValue(userItemRef, (snapshot) => {
+      if (snapshot.exists()) {
 
-  // GET label data
-  getLabelData() {
-  const url = "http://127.0.0.1:5000/all_labels";
-    fetch(url, { credentials: "same-origin" })
-      .then((response) => {
-        if (!response.ok)
-          throw Error(response.statusText);
-        return response.json();
-      })
-      .then((data) => {
-        // use the returned data to update state
-        this.loadLabels(data);
-      })
-      .catch((error) => console.log(error));
-  },
-  // POST add a new label/artist
-  addNewLabel(name, labelUrl) {
-    const url = 'http://127.0.0.1:5000/labels/';
-    fetch(url, {
-      method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify({
-        label_name: name,
-        label_url: labelUrl,
-      }),
+        const userSnapData =  snapshot.val();
+        // create an object identical to userSnapData, but with username and email removed
+        const {username, email, ...userSavedItems} = userSnapData;
+
+        this.firebaseLabelData = userSavedItems; 
+      } else {
+        this.firebaseLabelData = {}
+      }
     })
-      .then((response) => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.json();
-      })
-      .then((newData) => {
-        // add the recently saved data to the existing state
-        this.labelData = { 
-            ...this.labelData, 
-            [newData.label_name]: newData.label_url
-        }
-      })
-      .catch((error) => console.log(error));
   },
-  // DELETE delete a label/artist by name
-  deleteLabel(label_name) {
-    const url = 'http://127.0.0.1:5000/labels/';
-    fetch(url, {
-      method: 'DELETE',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify({
-        label_name: label_name,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.json();
-      })
-      .then((data) => {
-        // get back data for the remaining entries
-        // use that data to update the state
-        this.loadLabels(data.label_urls);
-      })
-      .catch((error) => console.log(error));
+  // Add artist or label for a user
+  addNewLabel(name, url, itemtype) {
+    const myUserId = auth.currentUser.uid;
+    const userItemRef = query(ref(db, 'users/' + myUserId), orderByChild('url'), equalTo(url));
+    // check the db to see if the current user has an item (artist or label) with the same url
+    onValue(userItemRef, (snapshot) => {
+      if (snapshot.exists()) {
+        console.log("db entry already exists")
+      } else {
+        // if there isnt an entry with a matching url, add the data to db
+        const itemData = {
+          name,
+          url,
+          itemtype,
+        };
+        // Get a key for a new Item.
+        const newItemKey = push(child(ref(db), 'users')).key;
+  
+        const updates = {};
+        // we can add more updates and write them to the db simultaneously
+        // (example) updates['/items/' + newItemKey] = itemData;
+        updates['/users/' + myUserId + '/' + newItemKey] = itemData;
+  
+        return update(ref(db), updates);
+      }
+    }, {
+      onlyOnce: true
+    });
+  },
+  // DELETE delete a label/artist by url
+  deleteLabel(url) {
+    const myUserId = auth.currentUser.uid;
+
+    const userItemRef = query(ref(db, 'users/' + myUserId), orderByChild('url'), equalTo(url));
+    // check the db to see if the current user has an item (artist or label) with the same url
+    onValue(userItemRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const itemKey = Object.keys(snapshot.val())[0]
+
+        // alternative way to delete the item
+        // remove(ref(db, 'users/' + myUserId + '/' + itemKey))
+
+        const updates = {};
+        updates['/users/' + myUserId + '/' + itemKey] = null;
+        update(ref(db), updates);
+      } else {
+        console.log("no entry to delete")
+      }
+    }, {
+      onlyOnce: true
+    });
   }
 })
