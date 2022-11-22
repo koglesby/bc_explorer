@@ -20,12 +20,13 @@ export const store = reactive({
   async register({ email, password, name}){
       const response = await createUserWithEmailAndPassword(auth, email, password)
       if (response) {
+          await updateProfile(response.user, {displayName: name})
           this.SET_USER(response.user);
-          updateProfile(response.user, {displayName: name})
-          set(ref(db, 'users/' + userId), {
-            username: name,
-            email: email,
-          });
+          // this would add user info to the RTDB, which may not be necessary
+          // set(ref(db, 'users/' + response.user.uid), {
+          //   username: name,
+          //   email: email,
+          // });
       } else {
           throw new Error('Unable to register user')
       }
@@ -49,7 +50,9 @@ export const store = reactive({
   },
   async logOut(){
     await signOut(auth)
-    this.SET_USER(null)
+    this.firebaseLabelData = {};
+    this.SET_LOGGED_IN(false);
+    this.SET_USER(null);
   },
   async fetchUser(user) {
     this.SET_LOGGED_IN(user !== null);
