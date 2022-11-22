@@ -46,6 +46,7 @@ Check out the [post](https://testdriven.io/developing-a-single-page-app-with-fla
 
     Start the emulators
     ```sh
+    $ cd client
     $ firebase emulators:start
     ```
 
