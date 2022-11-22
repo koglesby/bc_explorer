@@ -44,13 +44,13 @@ Check out the [post](https://testdriven.io/developing-a-single-page-app-with-fla
     ```
     (side note) maybe firebase-tools should be added as a devDependency
 
-    Start the emulators
+    Start the emulators in a different terminal window
     ```sh
     $ cd client
     $ firebase emulators:start
     ```
 
-1. Run the client-side Vue app in a different terminal window:
+1. Run the client-side Vue app in a different (3rd) terminal window:
 
     ```sh
     $ cd client
