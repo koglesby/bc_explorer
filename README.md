@@ -1,23 +1,62 @@
-How I got it to run
+# Developing a Single Page App with Flask and Vue.js
 
-- (created vitual environment)
-`$ python3 -m venv venv`
+### Want to learn how to build this?
 
-- (activate virtual environment)
-`$ source venv/bin/activate`
-- (install requirements)
-`(venv) $ pip install -r requirements.txt`
+Check out the [post](https://testdriven.io/developing-a-single-page-app-with-flask-and-vuejs).
 
-- maybe need to add more to the requirements.txt?
-`(venv) $ pip install Flask`
-`(venv) $ pip install Flask-Cors`
+## Want to use this project?
 
-- (start the app at localhost:5000)
-`flask run`
+1. Fork/Clone
 
-- Add the labels that are currently hardcoded
+1. Run the server-side Flask app in one terminal window:
 
-- data/label_urls.json
-`{"GD4YA": "https://gd4ya.bandcamp.com", "SVBKVLT": "https://svbkvlt.bandcamp.com", "The Flenser": "https://theflenser.bandcamp.com"}`
+    ```sh
+    $ cd server
+    $ python3.9 -m venv env
+    $ source env/bin/activate
+    (env)$ pip install -r requirements.txt
+    (env)$ python app.py
+    ```
 
-- reload the page
+    Navigate to [http://localhost:5000](http://localhost:5000)
+
+1. Configure Firebase, start emulators for development
+
+    Add Firebase credentials to your environment
+    ```
+    // client/.env
+    VUE_APP_FIREBASE_API_KEY=some-key-blah
+    VUE_APP_FIREBASE_AUTH_DOMAIN=some-auth-domain
+    VUE_APP_FIREBASE_PROJECT_ID=some-project-name
+    VUE_APP_FIREBASE_STORAGE_BUCKET=storage-bucket-url
+    VUE_APP_FIREBASE_MESSAGING_SENDER_ID=some-id-number
+    VUE_APP_FIREBASE_APP_ID=some-app-id-number
+    VUE_APP_FIREBASE_MEASUREMENT_ID=some-other-id
+    ```
+
+    Make sure you have firebase tools installed
+    ```
+    npm install -g firebase-tools
+    ```
+    or
+    ```
+    curl -sL firebase.tools | bash
+    ```
+    (side note) maybe firebase-tools should be added as a devDependency
+
+    Start the emulators in a different terminal window
+    ```sh
+    $ cd client
+    $ firebase emulators:start
+    ```
+
+1. Run the client-side Vue app in a different (3rd) terminal window:
+
+    ```sh
+    $ cd client
+    $ npm install
+    $ npm run serve
+    ```
+
+    Navigate to [http://localhost:8080](http://localhost:8080)
+
