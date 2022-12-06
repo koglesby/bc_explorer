@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <div class="wrapper">
-      <div class="followed-name">
+    <div class="row wrapper">
+      <div class="followed-name col-5">
         <a :href="label_url">
           <h2>{{ this.label_name }}</h2>
         </a>
@@ -9,7 +9,9 @@
           <h6>{{ this.itemtype }}</h6>
         </span>
       </div>
-      <b-button class="unfollow" variant="secondary" @click="delButton">Unfollow</b-button>
+      <div class="col-2 offset-5 float-right">
+        <b-button class="unfollow btn-lg float-right" variant="secondary" @click="delButton">Unfollow</b-button>
+      </div>
     </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
       <li class="prev">
@@ -68,14 +70,17 @@ export default {
     tns({
       container: `#${this.elId}`,
       items: 4,
-      gutter: 30,
-      slideBy: 1,
+      gutter: 10,
+      slideBy: "page",
       controlsPosition: 'bottom',
       navPosition: 'bottom',
       mouseDrag: true,
-      autoplay: true,
+      autoplay: false,
       autoplayButtonOutput: false,
       controlsContainer: `#custom-control-${this.elId}`,
+      speed: 800,
+      loop: false,
+      nav: false,
       responsive: {
         0: {
           items: 2,
@@ -83,10 +88,12 @@ export default {
         },
         768: {
           items: 3,
-          nav: true,
+          nav: false,
         },
         1440: {
-          items: 4,
+          items: 5,
+          slideBy: 5,
+          nav: false,
         },
       },
     });
@@ -103,7 +110,8 @@ export default {
 <style>
 .container {
   position: relative;
-  margin-top: 3%;
+  margin-top: 2%;
+  margin-bottom: 2%;
   padding: 0 !important;
 }
 
