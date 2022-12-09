@@ -1,6 +1,6 @@
 <template>
-  <div class="labels_container">
-    <div v-for="(itemData, itemId) in store.firebaseLabelData" v-bind:key="itemId">
+  <div class="labels_container" id="label_cont_id">
+    <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
       <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
       </LabelReleases>
     </div>
@@ -10,20 +10,29 @@
 import LabelReleases from './LabelReleases.vue';
 import { store } from './store';
 import { auth } from '../main';
+import _ from 'lodash';
 
 export default {
   data() {
     return {
-      store,
+      // store,
     };
+  },
+  computed: {
+    orderedData() {
+      // turns the firebaseLabelData into an array of objects, ordered aphabetically by the name property, excluding "The "
+      const lodashOrdered = _.orderBy(store.firebaseLabelData, item => item.name.replace(/^The /, ""));
+      return lodashOrdered;
+    }
   },
   async created() {
     auth.onAuthStateChanged(user => {
       if (!!user) {
-        this.store.getLabelData(user);
-        this.store.fetchUser(user);
+        store.getLabelData(user);
+        store.fetchUser(user);
       }
     })
+
   },
   components: { LabelReleases }
 }
