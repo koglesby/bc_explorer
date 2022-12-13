@@ -9,6 +9,7 @@ export const store = reactive({
     loggedIn: null,
     data: null
   },
+  newlyAddedUrl : '',
   firebaseLabelData: {},
   // AUTH -> state
   SET_USER(data) {
@@ -124,6 +125,8 @@ export const store = reactive({
         // we can add more updates and write them to the db simultaneously
         // (example) updates['/items/' + newItemKey] = itemData;
         updates['/users/' + myUserId + '/' + newItemKey] = itemData;
+        
+        this.newlyAddedUrl = url;
   
         return update(ref(db), updates);
       }

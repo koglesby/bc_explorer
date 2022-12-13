@@ -66,6 +66,22 @@ export default {
       })
       .catch((error) => console.log(error));
   },
+  mounted() {
+    // Check whether the label/artist was recently added, and scroll there if so
+    if (store.newlyAddedUrl === this.label_url) {
+      const el = document.querySelector(`#${this.elId}`);
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+
+      // could put this function in a utils.js file if we need to reuse it
+      //
+      // function _scrollTo(selector, yOffset = 0){
+      //   const el = document.querySelector(selector);
+      //   const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      //   window.scrollTo({top: y, behavior: 'smooth'});
+      // }
+    }
+  },
   updated() {
     tns({
       container: `#${this.elId}`,
