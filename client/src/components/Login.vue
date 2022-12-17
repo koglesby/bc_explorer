@@ -54,7 +54,7 @@ export default {
     methods: {
         async Login() {
             try {
-                store.logIn({
+                await store.logIn({
                     email: this.email,
                     password: this.password,
                 })

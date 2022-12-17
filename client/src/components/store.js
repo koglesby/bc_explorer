@@ -9,6 +9,7 @@ export const store = reactive({
     loggedIn: null,
     data: null
   },
+  newlyAddedUrl : '',
   firebaseLabelData: {},
   // AUTH -> state
   SET_USER(data) {
@@ -19,6 +20,16 @@ export const store = reactive({
   },
   async register({ email, password, name}){
       const response = await createUserWithEmailAndPassword(auth, email, password)
+        .catch((error) => {
+          const errorCode = error.code;
+
+          if (errorCode === 'auth/email-already-in-use') {
+            throw new Error('Unable to register user: Email already exists')
+          }
+          else {
+            throw new Error('Unable to register user') 
+          }
+        })
       if (response) {
           await updateProfile(response.user, {displayName: name})
           this.SET_USER(response.user);
@@ -27,9 +38,10 @@ export const store = reactive({
           //   username: name,
           //   email: email,
           // });
-      } else {
-          throw new Error('Unable to register user')
       }
+      //else {
+      //    throw new Error('Unable to register user')
+      //}
   },    
   // Existing and future Auth states are persisted after closing browser window
   async logIn({ email, password }){    
@@ -40,13 +52,24 @@ export const store = reactive({
       .catch((error) => {
         // Handle Errors here.
         const errorCode = error.code;
-        const errorMessage = error.message;
+        // const errorMessage = error.message;
+
+        if (errorCode === 'auth/user-not-found') {
+          throw new Error('Login failed: Username not found')
+        }
+        else if (errorCode === 'auth/wrong-password') {
+          throw new Error('Login failed: Incorrect password') 
+        }
+        else {
+          throw new Error('Login failed')
+        }
       });
     if (response) {
       this.SET_USER(response.user);
-    } else {
-        throw new Error('login failed')
-    }
+    } 
+    // else {
+      // throw new Error('login failed') 
+    // }
   },
   async logOut(){
     await signOut(auth)
@@ -102,6 +125,8 @@ export const store = reactive({
         // we can add more updates and write them to the db simultaneously
         // (example) updates['/items/' + newItemKey] = itemData;
         updates['/users/' + myUserId + '/' + newItemKey] = itemData;
+        
+        this.newlyAddedUrl = url;
   
         return update(ref(db), updates);
       }
