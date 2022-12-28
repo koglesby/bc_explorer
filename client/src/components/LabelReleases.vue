@@ -85,6 +85,7 @@ export default {
   updated() {
     tns({
       container: `#${this.elId}`,
+      lazyload: true,
       items: 4,
       gutter: 10,
       slideBy: "page",
