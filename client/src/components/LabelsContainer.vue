@@ -21,7 +21,7 @@ export default {
   computed: {
     orderedData() {
       // turns the firebaseLabelData into an array of objects, ordered aphabetically by the name property, excluding "The "
-      const lodashOrdered = _.orderBy(store.firebaseLabelData, item => item.name.replace(/^The /, ""));
+      const lodashOrdered = _.orderBy(store.firebaseLabelData, item => item.name.toLowerCase().replace(/^the /, ""));
       return lodashOrdered;
     }
   },
