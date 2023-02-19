@@ -127,6 +127,26 @@ def get_label_page_by_url(label_url):
     return albums
 
 
+def get_release_details(release_url):
+    """Return release details based on url"""
+    try:
+        result = requests.get(release_url)
+    except:
+        raise Exception(f"Cannot fetch info from url")
+    try:
+        doc = BeautifulSoup(result.text, 'html.parser')
+        release_credits = doc.find_all(class_='tralbum-credits')
+
+        stringy = release_credits[0].contents[0]
+
+        scraped_release_date = stringy.strip()
+
+    except:
+        raise Exception(f"Fail to parse html from url")
+
+    return scraped_release_date
+
+
 # def get_label_page(label_name, album_num=10, refresh=False):
 #     """Return the list of label releases given label name."""
 #     # Get label->url dictionary
