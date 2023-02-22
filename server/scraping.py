@@ -81,7 +81,10 @@ def scrape_user_search(username):
 
             result_info = searchresult.find(class_='result-info')
 
-            search_img = searchresult.find(class_='art').find('img')['src']
+            try:
+                search_img = searchresult.find(class_='art').find('img')['src']
+            except:
+                search_img = ""
 
             heading_contents = result_info.find(
                 class_='heading').find('a').contents
@@ -91,8 +94,11 @@ def scrape_user_search(username):
                 class_='itemurl').find('a').contents
             itemurl = itemurl_contents[0].strip()
             
-            genre_contents = searchresult.find(_class='genre').contents
-            genre = genre_contents[0].strip()
+            try:
+                genre_contents = searchresult.find(class_='genre').contents
+                genre = genre_contents[0].strip()[7:]
+            except:
+                genre = ""
 
             searchresult_object = {
                 'name': heading,
@@ -197,7 +203,7 @@ def get_release_details(release_url):
     return scraped_release_date
 
 
-def get_following_labels(profile_url):
+def scrape_following_labels(profile_url):
     """Get the labels and artists a Bandcamp user is following."""
     following_url = profile_url + '/following/artists_and_labels'
     try:

@@ -14,6 +14,7 @@
                             </div>
                             <RouterLink to="/">back to home</RouterLink>
                         </div>
+                        <SearchUser></SearchUser>
                     </div>
                     <div v-if="user.loggedIn === false">
                         <div class="card-body">
@@ -34,6 +35,7 @@
 <script>
 import { RouterLink } from "vue-router";
 import { store } from "./store";
+import SearchUser from './SearchUser.vue';
 
 export default {
     data() {
@@ -47,6 +49,6 @@ export default {
             this.$router.push("/");
         },
     },
-    components: { RouterLink }
+    components: { RouterLink, SearchUser }
 };
 </script>
