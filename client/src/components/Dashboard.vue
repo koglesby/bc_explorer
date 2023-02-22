@@ -12,6 +12,7 @@
                                     <button @click.prevent="signOut" class="btn btn-primary">Log Out</button>
                                 </div>
                             </div>
+                            <SearchUser></SearchUser>
                             <RouterLink to="/">back to home</RouterLink>
                         </div>
                     </div>
@@ -34,6 +35,7 @@
 <script>
 import { RouterLink } from "vue-router";
 import { store } from "./store";
+import SearchUser from './SearchUser.vue';
 
 export default {
     data() {
@@ -47,6 +49,6 @@ export default {
             this.$router.push("/");
         },
     },
-    components: { RouterLink }
+    components: { RouterLink, SearchUser }
 };
 </script>

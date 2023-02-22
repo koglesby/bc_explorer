@@ -59,6 +59,62 @@ def scrape_search(search_term):
     return searchresult_arr
 
 
+def scrape_user_search(username):
+    """Scrape the Bandcamp search result for user."""
+    try:
+        result = requests.get(
+            "https://bandcamp.com/search?q=" + username + "&item_type=f")
+    except:
+        raise Exception(f"Cannot fetch user search result")
+    try:
+        doc = BeautifulSoup(result.text, 'html.parser')
+    except:
+        raise Exception(f"Fail to parse html from url")
+    
+    try:
+        searchresults = doc.find_all(class_='searchresult')
+        searchresult_arr = []
+        for i, searchresult in enumerate(searchresults):
+            # Only fetch 10 results
+            if i == 10:
+                break
+
+            result_info = searchresult.find(class_='result-info')
+
+            try:
+                search_img = searchresult.find(class_='art').find('img')['src']
+            except:
+                search_img = ""
+
+            heading_contents = result_info.find(
+                class_='heading').find('a').contents
+            heading = heading_contents[0].strip()
+
+            itemurl_contents = searchresult.find(
+                class_='itemurl').find('a').contents
+            itemurl = itemurl_contents[0].strip()
+            
+            try:
+                genre_contents = searchresult.find(class_='genre').contents
+                genre = genre_contents[0].strip()[7:]
+            except:
+                genre = ""
+
+            searchresult_object = {
+                'name': heading,
+                'url': itemurl,
+                'img_src': search_img,
+                'genre': genre,
+                'id': uuid.uuid4().hex
+            }
+            
+            searchresult_arr.append(searchresult_object)
+    except:
+        raise Exception(f"Fail to find search results from url")
+    
+    return searchresult_arr
+    
+
 def get_label_urls():
     """Return the dictionary of label urls."""
     # Check and load label url json file
@@ -145,6 +201,30 @@ def get_release_details(release_url):
         raise Exception(f"Fail to parse html from url")
 
     return scraped_release_date
+
+
+def scrape_following_labels(profile_url):
+    """Get the labels and artists a Bandcamp user is following."""
+    following_url = profile_url + '/following/artists_and_labels'
+    try:
+        result = requests.get(following_url)
+    except:
+        raise Exception(f"Cannot fetch info from url: {following_url}")
+
+    try:
+        doc = BeautifulSoup(result.text, 'html.parser')
+    except:
+        raise Exception(f"Fail to parse html from url: {following_url}")
+
+    try:
+        follow_infos = doc.find_all(class_='fan-username')
+    except:
+        raise Exception(f"Fail to find following info from url: {following_url}")
+    
+    all_follows = [{'label_name': follow.get_text(), 'label_url': follow['href']}
+                   for follow in follow_infos]
+    
+    return all_follows
 
 
 # def get_label_page(label_name, album_num=10, refresh=False):
