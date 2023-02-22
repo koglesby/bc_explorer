@@ -12,9 +12,9 @@
                                     <button @click.prevent="signOut" class="btn btn-primary">Log Out</button>
                                 </div>
                             </div>
+                            <SearchUser></SearchUser>
                             <RouterLink to="/">back to home</RouterLink>
                         </div>
-                        <SearchUser></SearchUser>
                     </div>
                     <div v-if="user.loggedIn === false">
                         <div class="card-body">

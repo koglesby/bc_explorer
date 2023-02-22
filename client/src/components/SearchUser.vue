@@ -1,7 +1,8 @@
 <template>
-    <b-container fluid="sm" class="fixed-top search-enter">
+    <b-container fluid="sm" class="search-enter">
       <b-row>
         <b-col>
+          <div class="user-search-info"><p>Import your Bandcamp following list:</p></div>
           <input type="search" class="nosubmit form-control" placeholder="Search for your user name on Bandcamp..."
             @keyup.enter="useSearchUser" v-model="enter_search_term">
           <div class="results-container">
@@ -13,7 +14,7 @@
                     {{ n.name }}
                   </div>
                   <div class="genre">
-                    {{ n.genre }}
+                    Genre: {{ n.genre }}
                   </div>
                 </div>
               </div>
@@ -111,6 +112,11 @@
 
   .search-enter {
     margin-top: 3%;
+    margin-bottom: 3%;
+  }
+
+  .user-search-info {
+    font-weight: bold;
   }
   
   input.nosubmit {
