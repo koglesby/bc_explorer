@@ -45,7 +45,7 @@ export default {
     };
   },
   async created() {
-    this.elId = `elId-${Date.now()}`;
+    this.elId = `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`;
 
     const url = 'http://127.0.0.1:5000/get_releases/';
     fetch(url, {
