@@ -1,0 +1,17 @@
+Dockerfile
+.dockerignore
+node_modules/
+.gitignore
+.git
+/dist/
+__pycache__
+.DS_Store
+
+*.md
+
+.env
+.venv
+env/
+venv/
+ENV/
+

@@ -1,7 +1,7 @@
 <template>
   <div class="card bg-light mb-3" style="height:max-content; border: 0px">
     <a :href="url">
-      <img class="card-img-top img-fluid tns-lazy-img" :data-src="cover" alt="Cover image cap">
+      <img class="img-fluid tns-lazy-img" :data-src="cover" alt="Cover image cap">
       <div class="card-body">
         <h5 class="card-title text-truncate" style="color: black">{{ artist }}</h5>
         <p class="card-text text-truncate" style="color: black">{{ title }}</p>
@@ -10,7 +10,6 @@
     </a>
     <b-button @click="getReleaseDetails()">Get Details</b-button>
   </div>
-
 </template>
 
 <script>
@@ -23,8 +22,9 @@ export default {
   },
   methods: {
     getReleaseDetails() {
-      console.log("clicky release details");
-      const url = 'http://127.0.0.1:5000/get_release_details/';
+      const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
+
+      const url = base_url + "/get_release_details/";
       fetch(url, {
         method: 'POST',
         headers: new Headers({
@@ -47,6 +47,4 @@ export default {
 }
 </script>
 
-<style>
-
-</style>
+<style></style>

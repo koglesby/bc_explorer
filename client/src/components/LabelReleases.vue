@@ -46,8 +46,10 @@ export default {
   },
   async created() {
     this.elId = `elId-${Date.now()}`;
+    const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
 
-    const url = 'http://127.0.0.1:5000/get_releases/';
+    const url = base_url + "/get_releases/";
+
     fetch(url, {
       method: 'POST',
       headers: new Headers({

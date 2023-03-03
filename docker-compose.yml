@@ -1,0 +1,9 @@
+version: '3.3'
+services:
+  web:
+    container_name: bc_explorer
+    environment:
+      - PORT=8765
+    ports:
+      - '8007:8765'
+    image: 'web:latest'

@@ -2,7 +2,9 @@ import BootstrapVue from 'bootstrap-vue';
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
-import 'bootstrap/dist/css/bootstrap.css';
+
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -29,11 +31,11 @@ const auth = getAuth();
 const db = getDatabase();
 
 // for development, we can use an emulated db and auth
-if (location.hostname === "localhost") {
+if (process.env.NODE_ENV === "development") {
   // Point to the RTDB emulator running on localhost.
   connectDatabaseEmulator(db, "localhost", 9000);
   connectAuthEmulator(auth, "http://localhost:9099");
-} 
+}
 
 export { app, auth, db }
 

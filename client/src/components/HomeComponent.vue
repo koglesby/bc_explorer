@@ -23,12 +23,6 @@ export default {
 </script>
 
 <style>
-.card-img-top {
-  height: 150px;
-  width: 150px;
-  object-fit: cover;
-}
-
 .main-container {
   margin-top: 100px;
 }
