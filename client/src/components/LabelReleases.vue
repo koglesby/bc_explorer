@@ -45,7 +45,7 @@ export default {
     };
   },
   async created() {
-    this.elId = `elId-${Date.now()}`;
+    this.elId = `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`;
     const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
 
     const url = base_url + "/get_releases/";
