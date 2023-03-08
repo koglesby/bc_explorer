@@ -60,3 +60,19 @@ Check out the [post](https://testdriven.io/developing-a-single-page-app-with-fla
 
     Navigate to [http://localhost:8080](http://localhost:8080)
 
+## Building with Docker
+The dockerization of this project used this [post](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/) as a reference.
+
+1. To run this project with Docker, first make sure you have docker installed (https://docs.docker.com/get-docker/) and running and your firebase credentials added to your environment as above.
+1. You can build and run the project with a simple command:
+```
+docker-compose up --build
+```
+Navigate to [http://localhost:8007](http://localhost:8007).
+
+Running the project this way will access the real firebase database, NOT an emulated database. Currently I don't recommend this approach for development due to the build times, but it can help make sure changes will work as expected when pushed to production.
+
+You can remove containers when you're ready with the following command:
+```
+docker-compose down
+```
