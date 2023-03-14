@@ -82,9 +82,7 @@ export default {
         })
         .then((data) => {
           this.search_res_data = data.search_res;
-          if (process.env && process.env.NODE_ENV) {
-            this.enter_search_term = process.env.NODE_ENV;
-          }
+          this.enter_search_term = "";
         })
         .catch((error) => console.log(error));
     },
