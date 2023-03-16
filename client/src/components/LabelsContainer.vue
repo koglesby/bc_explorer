@@ -1,22 +1,18 @@
 <template>
-  <div id="label_cont_id" class="h-screen p-2 rounded" >
-      <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
-        <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
-        </LabelReleases>
-      </div>
-      <b-pagination class="pagination_nav_bar"
-        v-model="currentPage"
-        :total-rows="rows"
-        :per-page="perPage"
-        aria-controls="labels_list"
-      ></b-pagination>
-      <!-- <ul id="labels_list">
+  <div id="label_cont_id" class="h-screen p-2 rounded">
+    <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
+      <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
+      </LabelReleases>
+    </div>
+    <b-pagination class="pagination_nav_bar" v-model="currentPage" :total-rows="rows" :per-page="perPage"
+      aria-controls="labels_list"></b-pagination>
+    <!-- <ul id="labels_list">
         <li v-for="(itemData) in orderedData" v-bind:key="itemData.url">
           <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
           </LabelReleases> 
         </li>
       </ul> -->
-      <!-- <b-pagination-nav :link-gen="linkGen" :number-of-pages="numPages" v-model="currentPage"></b-pagination-nav> -->
+    <!-- <b-pagination-nav :link-gen="linkGen" :number-of-pages="numPages" v-model="currentPage"></b-pagination-nav> -->
   </div>
 </template>
 <script>
@@ -44,8 +40,7 @@ export default {
     },
 
     rows() {
-      const lodashOrdered = _.orderBy(store.firebaseLabelData, item => item.name.toLowerCase().replace(/^the /, ""));
-      return lodashOrdered.length;
+      return Object.keys(store.firebaseLabelData).length
     },
   },
   async created() {
@@ -56,9 +51,9 @@ export default {
       }
     })
 
-    const { list, containerProps, wrapperProps } = useVirtualList(this.orderedData, {
-      itemHeight: 96,
-    }); 
+    // const { list, containerProps, wrapperProps } = useVirtualList(this.orderedData, {
+    //   itemHeight: 96,
+    // });
 
   },
   components: { LabelReleases }
