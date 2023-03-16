@@ -20,7 +20,7 @@ import LabelReleases from './LabelReleases.vue';
 import { store } from './store';
 import { auth } from '../main';
 import _ from 'lodash';
-import { useVirtualList } from '@vueuse/core'
+// import { useVirtualList } from '@vueuse/core'
 
 
 export default {
