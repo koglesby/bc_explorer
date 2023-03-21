@@ -11,6 +11,7 @@ export const store = reactive({
   },
   newlyAddedUrl : '',
   firebaseLabelData: {},
+  firebaseFavorites: {},
   // AUTH -> state
   SET_USER(data) {
     this.user.data = data;
@@ -97,9 +98,31 @@ export const store = reactive({
         // create an object identical to userSnapData, but with username and email removed
         const {username, email, ...userSavedItems} = userSnapData;
 
-        this.firebaseLabelData = userSavedItems; 
+        this.firebaseLabelData = userSavedItems;
       } else {
         this.firebaseLabelData = {}
+      }
+    })
+
+    const userFavesRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'));
+    // check the db to see if the current user has an item (artist or label) with the same url
+    onValue(userFavesRef, (snapshot) => {
+      if (snapshot.exists()) {
+
+        const userFavesSnapData =  snapshot.val();
+        // create an object identical to userSnapData, but with username and email removed
+
+        console.log("userFavesSnapData", userFavesSnapData)
+
+        this.firebaseFavorites = userFavesSnapData;
+
+        // ['url', 'artist', 'cover', 'title']
+        // const {username, email, ...userSavedItems} = userFavesSnapData;
+
+        // this.firebaseLabelData = userSavedItems;
+      } else {
+        console.log("no dadadadtta");
+        // this.firebaseLabelData = {}
       }
     })
   },
@@ -166,6 +189,27 @@ export const store = reactive({
     });
 
 
+  },
+  unFavorite(url) {
+    const myUserId = auth.currentUser.uid;
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'), equalTo(url));
+
+    onValue(userItemRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const itemKey = Object.keys(snapshot.val())[0]
+
+        // alternative way to delete the item
+        // remove(ref(db, 'users/' + myUserId + '/' + itemKey))
+
+        const updates = {};
+        updates['/users/' + myUserId + '/favorites/' + itemKey] = null;
+        update(ref(db), updates);
+      } else {
+        console.log("no entry to delete")
+      }
+    }, {
+      onlyOnce: true
+    });
   },
   // DELETE delete a label/artist by url
   deleteLabel(url) {

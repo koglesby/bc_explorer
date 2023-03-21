@@ -8,19 +8,39 @@
         <p class="card-text text-truncate" style="color: black">{{ releaseDate }}</p>
       </div>
     </a>
-    <b-button @click="getReleaseDetails()">Get Details</b-button>
+
+    <div style="display: flex; justify-content: space-around">
+      <span><i class="fas fa-caret-down" style="cursor: pointer;" @click="getReleaseDetails()"></i></span>
+      <i class="fas fa-thumbs-up" style="cursor: pointer;" :class="{ thummy: isFave }" @click="faveToggle()"></i>
+    </div>
+
+
+
+
+
+
   </div>
 </template>
 
 <script>
 import { store } from './store';
+import _ from 'lodash';
+
 export default {
   props: ['url', 'artist', 'cover', 'title'],
   data() {
     return {
       store,
-      releaseDate: ''
+      releaseDate: '',
+      isFave: false
     };
+  },
+  async created() {
+    // find the release on firebaseFavorites, if it is there
+    const faveObj = _.find(this.store.firebaseFavorites, { 'url': this.url });
+
+    // convert object to boolean
+    this.isFave = !!faveObj;
   },
   methods: {
     getReleaseDetails() {
@@ -44,12 +64,27 @@ export default {
           this.releaseDate = data.details
         })
         .catch((error) => console.log(error));
-
-      this.store.addFavorite(this.url, this.artist, this.cover, this.title);
+    },
+    faveToggle() {
+      if (this.isFave) {
+        this.store.unFavorite(this.url);
+        this.isFave = false;
+      } else {
+        this.store.addFavorite(this.url, this.artist, this.cover, this.title);
+        this.isFave = true;
+      }
 
     }
   }
 }
 </script>
 
-<style></style>
+<style>
+.faved {
+  background-color: aquamarine !important;
+}
+
+.thummy {
+  color: blue;
+}
+</style>
