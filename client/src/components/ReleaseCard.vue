@@ -13,10 +13,12 @@
 </template>
 
 <script>
+import { store } from './store';
 export default {
   props: ['url', 'artist', 'cover', 'title'],
   data() {
     return {
+      store,
       releaseDate: ''
     };
   },
@@ -42,6 +44,9 @@ export default {
           this.releaseDate = data.details
         })
         .catch((error) => console.log(error));
+
+      this.store.addFavorite(this.url, this.artist, this.cover, this.title);
+
     }
   }
 }

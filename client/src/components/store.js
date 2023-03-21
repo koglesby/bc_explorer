@@ -88,7 +88,7 @@ export const store = reactive({
   // get the user's saved Artists/Labels
   getLabelData(user) {
     const myUserId = user.uid;
-    const userItemRef = query(ref(db, 'users/' + myUserId), orderByChild('url'));
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/follows'), orderByChild('url'));
     // check the db to see if the current user has an item (artist or label) with the same url
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -106,7 +106,7 @@ export const store = reactive({
   // Add artist or label for a user
   addNewLabel(name, url, itemtype) {
     const myUserId = auth.currentUser.uid;
-    const userItemRef = query(ref(db, 'users/' + myUserId), orderByChild('url'), equalTo(url));
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/follows'), orderByChild('url'), equalTo(url));
     // check the db to see if the current user has an item (artist or label) with the same url
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -119,12 +119,12 @@ export const store = reactive({
           itemtype,
         };
         // Get a key for a new Item.
-        const newItemKey = push(child(ref(db), 'users')).key;
+        const newItemKey = push(child(ref(db), 'users/' + myUserId + '/follows')).key;
   
         const updates = {};
         // we can add more updates and write them to the db simultaneously
         // (example) updates['/items/' + newItemKey] = itemData;
-        updates['/users/' + myUserId + '/' + newItemKey] = itemData;
+        updates['/users/' + myUserId + '/follows/' + newItemKey] = itemData;
         
         this.newlyAddedUrl = url;
   
@@ -133,6 +133,39 @@ export const store = reactive({
     }, {
       onlyOnce: true
     });
+  },
+  addFavorite(url, artist, cover, title) {    // ['url', 'artist', 'cover', 'title']
+    const myUserId = auth.currentUser.uid;
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'), equalTo(url));
+    // check the db to see if the current user has an item (artist or label) with the same url
+    onValue(userItemRef, (snapshot) => {
+      if (snapshot.exists()) {
+        console.log("db entry already exists")
+      } else {
+        // if there isnt an entry with a matching url, add the data to db
+        const itemData = {
+          title,
+          artist,
+          cover,
+          url,
+        };
+        // Get a key for a new Item.
+        const newItemKey = push(child(ref(db), 'users/' + myUserId + '/favorites')).key;
+  
+        const updates = {};
+        // we can add more updates and write them to the db simultaneously
+        // (example) updates['/items/' + newItemKey] = itemData;
+        updates['/users/' + myUserId + '/favorites/' + newItemKey] = itemData;
+        
+        this.newlyAddedUrl = url;
+  
+        return update(ref(db), updates);
+      }
+    }, {
+      onlyOnce: true
+    });
+
+
   },
   // DELETE delete a label/artist by url
   deleteLabel(url) {
