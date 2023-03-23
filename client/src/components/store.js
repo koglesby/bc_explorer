@@ -86,24 +86,18 @@ export const store = reactive({
       this.SET_USER(null)
     }
   },
-  // get the user's saved Artists/Labels
+  // get the user's saved Artists/Labels and favorites
   getLabelData(user) {
     const myUserId = user.uid;
-
     const userItemRef =  query(ref(db, 'users/' + myUserId ));
+
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
         const userSnapData =  snapshot.val();
 
-        if (!!userSnapData.follows) {
-          this.firebaseLabelData = userSnapData.follows;
-        }
-        if(!!userSnapData.favorites) {
-          this.firebaseFavorites = userSnapData.favorites;
-        }
-      } else {
-        this.firebaseFavorites, this.firebaseFavorites = {};
-      }
+        this.firebaseLabelData = !!userSnapData.follows ?  userSnapData.follows : {};
+        this.firebaseFavorites = !!userSnapData.favorites ? userSnapData.favorites: {};
+      } 
     })
   },
   // Add artist or label for a user
@@ -184,7 +178,7 @@ export const store = reactive({
   deleteLabel(url) {
     const myUserId = auth.currentUser.uid;
 
-    const userItemRef = query(ref(db, 'users/' + myUserId), orderByChild('url'), equalTo(url));
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/follows'), orderByChild('url'), equalTo(url));
     // check the db to see if the current user has an item (artist or label) with the same url
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -194,7 +188,7 @@ export const store = reactive({
         // remove(ref(db, 'users/' + myUserId + '/' + itemKey))
 
         const updates = {};
-        updates['/users/' + myUserId + '/' + itemKey] = null;
+        updates['/users/' + myUserId + '/follows/' + itemKey] = null;
         update(ref(db), updates);
       } else {
         console.log("no entry to delete")
