@@ -3,7 +3,7 @@
     <a :href="url">
       <img class="img-fluid tns-lazy-img" :data-src="cover" alt="Cover image cap">
       <div class="card-body">
-        <h5 class="card-title text-truncate" style="color: black">{{ artist }}</h5>
+        <h5 v-if="fromItemtype === 'LABEL'" class="card-title text-truncate" style="color: black">{{ artist }}</h5>
         <p class="card-text text-truncate" style="color: black">{{ title }}</p>
         <p v-if="openDetails && !loadingDetails" class="card-text text-truncate" style="color: black">{{ releaseDate }}
         </p>
@@ -24,7 +24,7 @@ import { store } from './store';
 import _ from 'lodash';
 
 export default {
-  props: ['url', 'artist', 'cover', 'title'],
+  props: ['url', 'artist', 'cover', 'title', 'fromItemtype'],
   data() {
     return {
       store,

@@ -25,7 +25,7 @@
       <div v-for="release, idx in releases" :key="idx">
         <ReleaseCard :key="release.album_name" :url="release.album_url"
           :artist="itemtype === 'ARTIST' ? label_name : release.artist_name" :cover="release.cover_img_url"
-          :title="release.album_name">
+          :title="release.album_name" :fromItemtype="itemtype">
         </ReleaseCard>
       </div>
     </div>
