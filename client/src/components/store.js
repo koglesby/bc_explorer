@@ -34,11 +34,6 @@ export const store = reactive({
       if (response) {
           await updateProfile(response.user, {displayName: name})
           this.SET_USER(response.user);
-          // this would add user info to the RTDB, which may not be necessary
-          // set(ref(db, 'users/' + response.user.uid), {
-          //   username: name,
-          //   email: email,
-          // });
       }
       //else {
       //    throw new Error('Unable to register user')
@@ -154,8 +149,6 @@ export const store = reactive({
     }, {
       onlyOnce: true
     });
-
-
   },
   unFavorite(url) {
     const myUserId = auth.currentUser.uid;
@@ -183,9 +176,6 @@ export const store = reactive({
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
         const itemKey = Object.keys(snapshot.val())[0]
-
-        // alternative way to delete the item
-        // remove(ref(db, 'users/' + myUserId + '/' + itemKey))
 
         const updates = {};
         updates['/users/' + myUserId + '/follows/' + itemKey] = null;
