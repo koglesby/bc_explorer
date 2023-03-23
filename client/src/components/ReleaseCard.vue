@@ -5,20 +5,17 @@
       <div class="card-body">
         <h5 class="card-title text-truncate" style="color: black">{{ artist }}</h5>
         <p class="card-text text-truncate" style="color: black">{{ title }}</p>
-        <p class="card-text text-truncate" style="color: black">{{ releaseDate }}</p>
+        <p v-if="openDetails && !loadingDetails" class="card-text text-truncate" style="color: black">{{ releaseDate }}
+        </p>
       </div>
     </a>
 
     <div style="display: flex; justify-content: space-around">
-      <span><i class="fas fa-caret-down" style="cursor: pointer;" @click="getReleaseDetails()"></i></span>
-      <i class="fas fa-thumbs-up" style="cursor: pointer;" :class="{ thummy: isFave }" @click="faveToggle()"></i>
+      <i v-if="!openDetails && !loadingDetails" class="fas fa-caret-down info-icon" @click="getReleaseDetails()"></i>
+      <i v-if="openDetails && !loadingDetails" class="fas fa-caret-up info-icon" @click="showLess()"></i>
+      <i v-if="loadingDetails" class="fas fa-spinner fa-spin"></i>
+      <i class="fas fa-thumbs-up info-icon" :class="{ thummy: isFave }" @click="faveToggle()"></i>
     </div>
-
-
-
-
-
-
   </div>
 </template>
 
@@ -32,7 +29,9 @@ export default {
     return {
       store,
       releaseDate: '',
-      isFave: false
+      isFave: false,
+      openDetails: false,
+      loadingDetails: false
     };
   },
   async created() {
@@ -43,27 +42,34 @@ export default {
     this.isFave = !!faveObj;
   },
   methods: {
+    showLess() {
+      this.openDetails = false;
+    },
     getReleaseDetails() {
-      const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
-
-      const url = base_url + "/get_release_details/";
-      fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({
-          url: this.url
+      if (this.releaseDate === '') {
+        const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
+        this.loadingDetails = true;
+        const url = base_url + "/get_release_details/";
+        fetch(url, {
+          method: 'POST',
+          headers: new Headers({
+            'Content-Type': 'application/json',
+          }),
+          body: JSON.stringify({
+            url: this.url
+          })
         })
-      })
-        .then((response) => {
-          if (!response.ok) throw Error(response.statusText);
-          return response.json();
-        })
-        .then((data) => {
-          this.releaseDate = data.details
-        })
-        .catch((error) => console.log(error));
+          .then((response) => {
+            if (!response.ok) throw Error(response.statusText);
+            return response.json();
+          })
+          .then((data) => {
+            this.releaseDate = data.details;
+            this.loadingDetails = false;
+          })
+          .catch((error) => console.log(error));
+      }
+      this.openDetails = true;
     },
     faveToggle() {
       if (this.isFave) {
@@ -73,18 +79,23 @@ export default {
         this.store.addFavorite(this.url, this.artist, this.cover, this.title);
         this.isFave = true;
       }
-
     }
   }
 }
 </script>
 
 <style>
-.faved {
-  background-color: aquamarine !important;
+.thummy {
+  color: fuchsia !important;
 }
 
-.thummy {
-  color: blue;
+.info-icon {
+  cursor: pointer;
+  color: #474747;
+}
+
+.info-icon:hover {
+  transform: scale(1.1);
+  color: black;
 }
 </style>
