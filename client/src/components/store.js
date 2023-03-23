@@ -89,40 +89,20 @@ export const store = reactive({
   // get the user's saved Artists/Labels
   getLabelData(user) {
     const myUserId = user.uid;
-    const userItemRef = query(ref(db, 'users/' + myUserId + '/follows'), orderByChild('url'));
-    // check the db to see if the current user has an item (artist or label) with the same url
+
+    const userItemRef =  query(ref(db, 'users/' + myUserId ));
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
-
         const userSnapData =  snapshot.val();
-        // create an object identical to userSnapData, but with username and email removed
-        const {username, email, ...userSavedItems} = userSnapData;
 
-        this.firebaseLabelData = userSavedItems;
+        if (!!userSnapData.follows) {
+          this.firebaseLabelData = userSnapData.follows;
+        }
+        if(!!userSnapData.favorites) {
+          this.firebaseFavorites = userSnapData.favorites;
+        }
       } else {
-        this.firebaseLabelData = {}
-      }
-    })
-
-    const userFavesRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'));
-    // check the db to see if the current user has an item (artist or label) with the same url
-    onValue(userFavesRef, (snapshot) => {
-      if (snapshot.exists()) {
-
-        const userFavesSnapData =  snapshot.val();
-        // create an object identical to userSnapData, but with username and email removed
-
-        console.log("userFavesSnapData", userFavesSnapData)
-
-        this.firebaseFavorites = userFavesSnapData;
-
-        // ['url', 'artist', 'cover', 'title']
-        // const {username, email, ...userSavedItems} = userFavesSnapData;
-
-        // this.firebaseLabelData = userSavedItems;
-      } else {
-        console.log("no dadadadtta");
-        // this.firebaseLabelData = {}
+        this.firebaseFavorites, this.firebaseFavorites = {};
       }
     })
   },
@@ -133,7 +113,7 @@ export const store = reactive({
     // check the db to see if the current user has an item (artist or label) with the same url
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
-        console.log("db entry already exists")
+        console.log("db entry already exists");
       } else {
         // if there isnt an entry with a matching url, add the data to db
         const itemData = {
@@ -150,37 +130,30 @@ export const store = reactive({
         updates['/users/' + myUserId + '/follows/' + newItemKey] = itemData;
         
         this.newlyAddedUrl = url;
-  
+
         return update(ref(db), updates);
       }
     }, {
       onlyOnce: true
     });
   },
-  addFavorite(url, artist, cover, title) {    // ['url', 'artist', 'cover', 'title']
+  addFavorite(url, artist, cover, title) {
     const myUserId = auth.currentUser.uid;
     const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'), equalTo(url));
-    // check the db to see if the current user has an item (artist or label) with the same url
+
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
         console.log("db entry already exists")
       } else {
-        // if there isnt an entry with a matching url, add the data to db
         const itemData = {
           title,
           artist,
           cover,
           url,
         };
-        // Get a key for a new Item.
         const newItemKey = push(child(ref(db), 'users/' + myUserId + '/favorites')).key;
-  
         const updates = {};
-        // we can add more updates and write them to the db simultaneously
-        // (example) updates['/items/' + newItemKey] = itemData;
         updates['/users/' + myUserId + '/favorites/' + newItemKey] = itemData;
-        
-        this.newlyAddedUrl = url;
   
         return update(ref(db), updates);
       }
@@ -197,10 +170,6 @@ export const store = reactive({
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
         const itemKey = Object.keys(snapshot.val())[0]
-
-        // alternative way to delete the item
-        // remove(ref(db, 'users/' + myUserId + '/' + itemKey))
-
         const updates = {};
         updates['/users/' + myUserId + '/favorites/' + itemKey] = null;
         update(ref(db), updates);
