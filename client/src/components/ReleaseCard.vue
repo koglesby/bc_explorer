@@ -3,7 +3,7 @@
     <a :href="url">
       <img class="img-fluid tns-lazy-img" :data-src="cover" alt="Cover image cap">
       <div class="card-body">
-        <h5 v-if="fromItemtype === 'LABEL'" class="card-title text-truncate" style="color: black">{{ artist }}</h5>
+        <h5 v-if="fromItemtype !== 'ARTIST'" class="card-title text-truncate" style="color: black">{{ artist }}</h5>
         <p class="card-text text-truncate" style="color: black">{{ title }}</p>
         <p v-if="openDetails && !loadingDetails" class="card-text text-truncate" style="color: black">{{ releaseDate }}
         </p>
@@ -14,7 +14,7 @@
       <i v-if="!openDetails && !loadingDetails" class="fas fa-caret-down info-icon" @click="getReleaseDetails()"></i>
       <i v-if="openDetails && !loadingDetails" class="fas fa-caret-up info-icon" @click="showLess()"></i>
       <i v-if="loadingDetails" class="fas fa-spinner fa-spin"></i>
-      <i class="fas fa-thumbs-up info-icon" :class="{ thummy: isFave }" @click="faveToggle()"></i>
+      <i class="fas fa-thumbs-up info-icon" :class="{ thummy: isFavorite }" @click="faveToggle()"></i>
     </div>
   </div>
 </template>
@@ -29,17 +29,15 @@ export default {
     return {
       store,
       releaseDate: '',
-      isFave: false,
       openDetails: false,
       loadingDetails: false
     };
   },
-  async created() {
-    // find the release on firebaseFavorites, if it is there
-    const faveObj = _.find(this.store.firebaseFavorites, { 'url': this.url });
-
-    // convert object to boolean
-    this.isFave = !!faveObj;
+  computed: {
+    isFavorite() {
+      const faveObj = _.find(this.store.firebaseFavorites, { 'url': this.url });
+      return !!faveObj;
+    }
   },
   methods: {
     showLess() {
@@ -72,12 +70,10 @@ export default {
       this.openDetails = true;
     },
     faveToggle() {
-      if (this.isFave) {
+      if (this.isFavorite) {
         this.store.unFavorite(this.url);
-        this.isFave = false;
       } else {
         this.store.addFavorite(this.url, this.artist, this.cover, this.title);
-        this.isFave = true;
       }
     }
   }

@@ -1,5 +1,8 @@
 <template>
-  <div id="label_cont_id" class="h-screen p-2 rounded">
+  <div class="h-screen p-2 rounded">
+    <div>
+      <Favorites></Favorites>
+    </div>
     <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
       <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
       </LabelReleases>
@@ -17,11 +20,11 @@
 </template>
 <script>
 import LabelReleases from './LabelReleases.vue';
+import Favorites from './Favorites.vue'
 import { store } from './store';
 import { auth } from '../main';
 import _ from 'lodash';
 // import { useVirtualList } from '@vueuse/core'
-
 
 export default {
   data() {
@@ -38,7 +41,6 @@ export default {
       // return lodashOrdered;
       return lodashOrdered.slice((this.currentPage - 1) * this.perPage, this.currentPage * this.perPage);
     },
-
     rows() {
       return Object.keys(store.firebaseLabelData).length
     },
@@ -56,7 +58,7 @@ export default {
     // });
 
   },
-  components: { LabelReleases }
+  components: { Favorites, LabelReleases }
 }
 </script>
 
