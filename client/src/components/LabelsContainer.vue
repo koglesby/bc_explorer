@@ -3,19 +3,15 @@
     <div>
       <Favorites></Favorites>
     </div>
+    <div>
+      <AlbumRecs></AlbumRecs>
+    </div>
     <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
       <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
       </LabelReleases>
     </div>
     <b-pagination class="pagination_nav_bar" v-model="currentPage" :total-rows="rows" :per-page="perPage"
       aria-controls="labels_list"></b-pagination>
-    <!-- <ul id="labels_list">
-        <li v-for="(itemData) in orderedData" v-bind:key="itemData.url">
-          <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
-          </LabelReleases> 
-        </li>
-      </ul> -->
-    <!-- <b-pagination-nav :link-gen="linkGen" :number-of-pages="numPages" v-model="currentPage"></b-pagination-nav> -->
   </div>
 </template>
 <script>
@@ -24,6 +20,7 @@ import Favorites from './Favorites.vue'
 import { store } from './store';
 import { auth } from '../main';
 import _ from 'lodash';
+import AlbumRecs from './AlbumRecs.vue';
 // import { useVirtualList } from '@vueuse/core'
 
 export default {
@@ -58,7 +55,7 @@ export default {
     // });
 
   },
-  components: { Favorites, LabelReleases }
+  components: { LabelReleases, Favorites, AlbumRecs }
 }
 </script>
 

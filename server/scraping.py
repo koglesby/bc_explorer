@@ -1,4 +1,5 @@
 """Functions for scraping and information collection."""
+from urllib.parse import urlparse
 import json
 import requests
 from pathlib import Path
@@ -70,7 +71,7 @@ def scrape_user_search(username):
         doc = BeautifulSoup(result.text, 'html.parser')
     except:
         raise Exception(f"Fail to parse html from url")
-    
+
     try:
         searchresults = doc.find_all(class_='searchresult')
         searchresult_arr = []
@@ -93,7 +94,7 @@ def scrape_user_search(username):
             itemurl_contents = searchresult.find(
                 class_='itemurl').find('a').contents
             itemurl = itemurl_contents[0].strip()
-            
+
             try:
                 genre_contents = searchresult.find(class_='genre').contents
                 genre = genre_contents[0].strip()[7:]
@@ -107,13 +108,13 @@ def scrape_user_search(username):
                 'genre': genre,
                 'id': uuid.uuid4().hex
             }
-            
+
             searchresult_arr.append(searchresult_object)
     except:
         raise Exception(f"Fail to find search results from url")
-    
+
     return searchresult_arr
-    
+
 
 def get_label_urls():
     """Return the dictionary of label urls."""
@@ -149,17 +150,6 @@ def scrape_label_releases(label_url):
         raise Exception(f"Fail to find album infos from url: {label_url}")
 
     return album_infos
-
-
-# def get_local_albums(label_name):
-#     """Get the list of album infos stored locally."""
-#     release_info_path = Path('.') / 'data' / (label_name + '.json')
-#     local_album_infos = []
-#     if release_info_path.is_file():
-#         with open(release_info_path, 'r') as f:
-#             local_album_infos = json.load(f)
-
-#     return local_album_infos
 
 
 def get_label_page_by_url(label_url):
@@ -203,6 +193,66 @@ def get_release_details(release_url):
     return scraped_release_date
 
 
+def scrape_recommended(release_url):
+    """Return release details based on url"""
+    try:
+        result = requests.get(release_url)
+    except:
+        raise Exception(f"Cannot fetch info from url")
+    try:
+        doc = BeautifulSoup(result.text, 'html.parser')
+
+        whole_els = doc.find_all(class_='recommended-album')
+        # create an empty list to store the extracted information
+        extracted_info = []
+
+        # iterate over each element
+        for element in whole_els:
+            # use BeautifulSoup to parse the element's HTML
+            soup = BeautifulSoup(str(element), 'html.parser')
+
+            # extract the required information
+            album_art = soup.find('img', class_='album-art')['src']
+
+            # change the image src to a larger version
+            new_number = '2'
+
+            # Split the string into two parts: before and after the underscore
+            string_parts = album_art.split('_')
+            before_underscore = string_parts[0] + '_'
+            after_underscore = string_parts[1]
+
+            # Replace the numbers after the underscore with the new number
+            new_string = before_underscore + new_number + \
+                '.' + after_underscore.split('.')[1]
+
+            release_title = soup.find('span', class_='release-title').text
+            by_artist = soup.find('span', class_='by-artist').text
+            # remove 'by ' from scraped by-artist
+            artist = by_artist[3:]
+
+            go_to_album = soup.find('a', class_='go-to-album')['href']
+            # remove query string from the end of the scraped href ( '...?from=footer-cc-a26986634' )
+            href_without_querystring = urlparse(
+                go_to_album)._replace(query=None).geturl()
+
+            # create an object for the extracted information
+            info_object = {
+                'album_art': new_string,
+                'release_title': release_title,
+                'by_artist': artist,
+                'go_to_album': href_without_querystring
+            }
+
+            # append the object to the list of extracted information
+            extracted_info.append(info_object)
+
+    except:
+        raise Exception(f"Fail to parse html from url")
+
+    return extracted_info
+
+
 def scrape_following_labels(profile_url):
     """Get the labels and artists a Bandcamp user is following."""
     following_url = profile_url + '/following/artists_and_labels'
@@ -219,11 +269,12 @@ def scrape_following_labels(profile_url):
     try:
         follow_infos = doc.find_all(class_='fan-username')
     except:
-        raise Exception(f"Fail to find following info from url: {following_url}")
-    
+        raise Exception(
+            f"Fail to find following info from url: {following_url}")
+
     all_follows = [{'label_name': follow.get_text(), 'label_url': follow['href']}
                    for follow in follow_infos]
-    
+
     return all_follows
 
 

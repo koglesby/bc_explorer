@@ -1,8 +1,8 @@
 <template>
-  <div class="container" :key="componentKey">
+  <div class="container" v-if="this.releases.length > 0">
     <div class="row wrapper">
-      <div class="followed-name col-5">
-        <h2>Faves</h2>
+      <div class="followed-name col-12">
+        <h2>Based on liking {{ faveSample.title }} by {{ faveSample.artist }}</h2>
       </div>
     </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
@@ -15,9 +15,9 @@
     </ul>
 
     <div :id="[this.elId]">
-      <div v-for="release, idx in favesArr" :key="idx">
-        <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
-          :title="release.title" fromItemtype="FAVES">
+      <div v-for="release, idx in releases" :key="idx">
+        <ReleaseCard :key="release.release_title" :url="release.go_to_album" :artist="release.by_artist"
+          :cover="release.album_art" :title="release.release_title" fromItemtype="FAVES">
         </ReleaseCard>
       </div>
     </div>
@@ -30,18 +30,17 @@ import { tns } from "tiny-slider";
 import { store } from './store';
 import _ from 'lodash';
 
+
 export default {
   data() {
     return {
       releases: [],
-      elId: '',
-      componentKey: 0,
+      elId: ''
     };
   },
-
   computed: {
-    favesArr() {
-      return _.toArray(store.firebaseFavorites);
+    faveSample() {
+      return _.sample(_.toArray(store.firebaseFavorites));
     },
   },
   async created() {
@@ -79,12 +78,29 @@ export default {
         },
       },
     });
-
     return slider;
   },
   watch: {
-    favesArr() {
-      this.componentKey += 1;
+    faveSample() {
+      const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
+      const url = base_url + "/get_recommended/";
+      fetch(url, {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          url: this.faveSample.url
+        })
+      })
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json();
+        })
+        .then((data) => {
+          this.releases = data.details;
+        })
+        .catch((error) => console.log(error));
     }
   },
   components: { ReleaseCard },

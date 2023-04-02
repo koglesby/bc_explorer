@@ -65,6 +65,7 @@ export default {
         return response.json();
       })
       .then((data) => {
+        console.log("LabelReleases data", data);
         this.releases = data.releases;
       })
       .catch((error) => console.log(error));

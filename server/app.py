@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request, abort, Response, render_template
 from flask_cors import CORS
 
 from crypt import methods
-from scraping import scrape_search, get_label_page_by_url, get_release_details, scrape_user_search, scrape_following_labels
+from scraping import scrape_search, get_label_page_by_url, get_release_details, scrape_user_search, scrape_following_labels, scrape_recommended
 from utils import save_label_url, deleteArtLab
 
 # configuration
@@ -48,7 +48,26 @@ def get_release_dates():
     try:
         details = get_release_details(release_url)
 
-        # releases = get_label_page_by_url(label_url)
+        resp_dict = {
+            "details": details
+        }
+    except (ValueError, KeyError) as vke:
+        abort(400, str(vke))
+    except Exception as e:
+        abort(503, str(e))
+
+    return resp_dict, 200
+
+
+@app.route("/get_recommended/", methods=['POST'])
+def get_recs():
+    """Get something else based on url"""
+    try:
+        release_url = request.json['url']
+    except:
+        abort(400, "Cannot parse release url from request.")
+    try:
+        details = scrape_recommended(release_url)
 
         resp_dict = {
             "details": details
