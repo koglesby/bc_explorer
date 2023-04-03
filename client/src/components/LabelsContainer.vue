@@ -1,10 +1,10 @@
 <template>
   <div class="h-screen p-2 rounded">
     <div>
-      <Favorites></Favorites>
+      <Favorites :page="currentPage"></Favorites>
     </div>
     <div>
-      <AlbumRecs></AlbumRecs>
+      <AlbumRecs v-if="currentPage === 1 && !!sampleForRec" :sampleForRec="sampleForRec"></AlbumRecs>
     </div>
     <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
       <LabelReleases :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
@@ -41,6 +41,12 @@ export default {
     rows() {
       return Object.keys(store.firebaseLabelData).length
     },
+    // faves() {
+    //   return _.toArray(store.firebaseFavorites);
+    // },
+    sampleForRec() {
+      return _.sample(_.toArray(store.firebaseFavorites));
+    }
   },
   async created() {
     auth.onAuthStateChanged(user => {

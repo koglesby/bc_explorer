@@ -1,8 +1,8 @@
 <template>
-  <div class="container" v-if="this.releases.length > 0">
+  <div class="container">
     <div class="row wrapper">
       <div class="followed-name col-12">
-        <h2>Based on liking {{ faveSample.title }} by {{ faveSample.artist }}</h2>
+        <h2>Based on liking <i>{{ this.sampleForRec.title }}</i> by {{ this.sampleForRec.artist }}</h2>
       </div>
     </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
@@ -32,6 +32,7 @@ import _ from 'lodash';
 
 
 export default {
+  props: ['sampleForRec'],
   data() {
     return {
       releases: [],
@@ -81,7 +82,7 @@ export default {
     return slider;
   },
   watch: {
-    faveSample() {
+    sampleForRec() {
       const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
       const url = base_url + "/get_recommended/";
       fetch(url, {
@@ -90,7 +91,7 @@ export default {
           'Content-Type': 'application/json',
         }),
         body: JSON.stringify({
-          url: this.faveSample.url
+          url: this.sampleForRec.url
         })
       })
         .then((response) => {

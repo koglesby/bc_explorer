@@ -1,24 +1,26 @@
 <template>
-  <div class="container" :key="componentKey">
-    <div class="row wrapper">
-      <div class="followed-name col-5">
-        <h2>Faves</h2>
+  <div v-if="this.page === 1">
+    <div class="container" :key="componentKey">
+      <div class="row wrapper">
+        <div class="followed-name col-5">
+          <h2>Favorites</h2>
+        </div>
       </div>
-    </div>
-    <ul class="control" :id="['custom-control-' + this.elId]">
-      <li class="prev">
-        <i class="fas fa-angle-left fa-2x"></i>
-      </li>
-      <li class="next">
-        <i class="fas fa-angle-right fa-2x"></i>
-      </li>
-    </ul>
+      <ul class="control" :id="['custom-control-' + this.elId]">
+        <li class="prev">
+          <i class="fas fa-angle-left fa-2x"></i>
+        </li>
+        <li class="next">
+          <i class="fas fa-angle-right fa-2x"></i>
+        </li>
+      </ul>
 
-    <div :id="[this.elId]">
-      <div v-for="release, idx in favesArr" :key="idx">
-        <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
-          :title="release.title" fromItemtype="FAVES">
-        </ReleaseCard>
+      <div :id="[this.elId]">
+        <div v-for="release, idx in favesArr" :key="idx">
+          <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
+            :title="release.title" fromItemtype="FAVES">
+          </ReleaseCard>
+        </div>
       </div>
     </div>
   </div>
@@ -31,9 +33,9 @@ import { store } from './store';
 import _ from 'lodash';
 
 export default {
+  props: ['page'],
   data() {
     return {
-      releases: [],
       elId: '',
       componentKey: 0,
     };
@@ -48,44 +50,47 @@ export default {
     this.elId = `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`;
   },
   updated() {
-    const slider = tns({
-      container: `#${this.elId}`,
-      lazyload: true,
-      items: 4,
-      gutter: 10,
-      slideBy: "page",
-      controlsPosition: 'bottom',
-      navPosition: 'bottom',
-      mouseDrag: true,
-      autoplay: false,
-      autoplayButtonOutput: false,
-      controlsContainer: `#custom-control-${this.elId}`,
-      speed: 800,
-      loop: false,
-      nav: false,
-      responsive: {
-        0: {
-          items: 2,
-          nav: false,
+    if (this.page === 1) {
+      const slider = tns({
+        container: `#${this.elId}`,
+        lazyload: true,
+        items: 4,
+        gutter: 10,
+        slideBy: "page",
+        controlsPosition: 'bottom',
+        navPosition: 'bottom',
+        mouseDrag: true,
+        autoplay: false,
+        autoplayButtonOutput: false,
+        controlsContainer: `#custom-control-${this.elId}`,
+        speed: 800,
+        loop: false,
+        nav: false,
+        responsive: {
+          0: {
+            items: 2,
+            nav: false,
+          },
+          768: {
+            items: 3,
+            nav: false,
+          },
+          1440: {
+            items: 5,
+            slideBy: 5,
+            nav: false,
+          },
         },
-        768: {
-          items: 3,
-          nav: false,
-        },
-        1440: {
-          items: 5,
-          slideBy: 5,
-          nav: false,
-        },
-      },
-    });
+      });
 
-    return slider;
+      return slider;
+    }
+
   },
   watch: {
     favesArr() {
       this.componentKey += 1;
-    }
+    },
   },
   components: { ReleaseCard },
 };
