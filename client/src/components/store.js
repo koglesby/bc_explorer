@@ -96,7 +96,7 @@ export const store = reactive({
     })
   },
   // Add artist or label for a user
-  addNewLabel(name, url, itemtype) {
+  addNewLabel(follow_name, url, itemtype) {
     const myUserId = auth.currentUser.uid;
     const userItemRef = query(ref(db, 'users/' + myUserId + '/follows'), orderByChild('url'), equalTo(url));
     // check the db to see if the current user has an item (artist or label) with the same url
@@ -106,9 +106,9 @@ export const store = reactive({
       } else {
         // if there isnt an entry with a matching url, add the data to db
         const itemData = {
-          name,
+          follow_name,
           url,
-          itemtype,
+          itemtype, // 'ARTIST' or 'LABEL'
         };
         // Get a key for a new Item.
         const newItemKey = push(child(ref(db), 'users/' + myUserId + '/follows')).key;
@@ -126,20 +126,33 @@ export const store = reactive({
       onlyOnce: true
     });
   },
-  addFavorite(url, artist, cover, title) {
+  addFavorite(album_url,artist_name,cover_img_url,album_name) {
+    
     const myUserId = auth.currentUser.uid;
-    const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'), equalTo(url));
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('album_url'), equalTo(album_url));
 
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {
         console.log("db entry already exists")
       } else {
+        // const itemData = {
+        //   title,
+        //   artist,
+        //   cover,
+        //   url,
+        // };
         const itemData = {
-          title,
-          artist,
-          cover,
-          url,
+          album_name,
+          artist_name,
+          cover_img_url,
+          album_url,
         };
+      //   <ReleaseCard :key="release.album_name" :url="release.album_url"
+      //   :artist="itemtype === 'ARTIST' ? label_name : release.artist_name" :cover="release.cover_img_url"
+      //   :title="release.album_name" :fromItemtype="itemtype">
+      // </ReleaseCard>
+
+
         const newItemKey = push(child(ref(db), 'users/' + myUserId + '/favorites')).key;
         const updates = {};
         updates['/users/' + myUserId + '/favorites/' + newItemKey] = itemData;
@@ -152,7 +165,7 @@ export const store = reactive({
   },
   unFavorite(url) {
     const myUserId = auth.currentUser.uid;
-    const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('url'), equalTo(url));
+    const userItemRef = query(ref(db, 'users/' + myUserId + '/favorites'), orderByChild('album_url'), equalTo(url));
 
     onValue(userItemRef, (snapshot) => {
       if (snapshot.exists()) {

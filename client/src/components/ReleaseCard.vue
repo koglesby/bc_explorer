@@ -34,7 +34,7 @@ export default {
   },
   computed: {
     isFavorite() {
-      const faveObj = _.find(this.store.firebaseFavorites, { 'url': this.url });
+      const faveObj = _.find(this.store.firebaseFavorites, { 'album_url': this.url });
       return !!faveObj;
     }
   },
@@ -72,6 +72,7 @@ export default {
       if (this.isFavorite) {
         this.store.unFavorite(this.url);
       } else {
+        console.log("releasecard this.url", this.url)
         this.store.addFavorite(this.url, this.artist, this.cover, this.title);
       }
     }

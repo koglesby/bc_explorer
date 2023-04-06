@@ -2,20 +2,20 @@
   <div class="container" :key="componentKey"
     v-if="this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL'">
     <div class="row wrapper">
-      <div class="followed-name" :class="itemtype === 'RECOMMEND' ? 'col-12' : 'col-5'">
+      <div class="followed-name" :class="itemtype === 'RECS' ? 'col-12' : 'col-5'">
+        <!-- <div v-if="itemtype === 'RECS'">
+          <h2>Based on liking <i>{{ this.fave.album_name }}</i> by {{ this.fave.artist_name }}</h2>
+        </div> -->
         <div v-if="itemtype === 'FAVES'">
           <h2>Favorites</h2>
         </div>
         <div v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
-          <a :href="label_url">
-            <h2>{{ this.label_name }}</h2>
+          <a :href="followUrl">
+            <h2>{{ this.followName }}</h2>
           </a>
           <span>
             <h6>{{ this.itemtype }}</h6>
           </span>
-        </div>
-        <div v-if="itemtype === 'RECOMMEND'">
-          <h2>Based on liking <i>{{ this.label_name }}</i> by {{ this.sample_artist }}</h2>
         </div>
       </div>
       <div class="col-2 offset-5 float-right" v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
@@ -32,22 +32,36 @@
     </ul>
     <div :id="[this.elId]" v-if="itemtype === 'FAVES'">
       <div v-for="release, idx in faveData" :key="idx">
-        <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
-          :title="release.title" fromItemtype="FAVES">
+        <!-- <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
+          :title="release.title" :fromItemtype="itemtype">
+        </ReleaseCard> -->
+
+        <ReleaseCard :key="release.album_name" :url="release.album_url"
+          :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
+          :title="release.album_name" :fromItemtype="itemtype">
         </ReleaseCard>
       </div>
     </div>
-    <div :id="[this.elId]" v-if="itemtype !== 'FAVES'">
+    <div :id="[this.elId]" v-else>
       <div v-for="release, idx in releases" :key="idx">
-        <ReleaseCard v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'" :key="release.album_name"
-          :url="release.album_url" :artist="itemtype === 'ARTIST' ? label_name : release.artist_name"
-          :cover="release.cover_img_url" :title="release.album_name" :fromItemtype="itemtype">
-        </ReleaseCard>
-        <ReleaseCard v-if="itemtype === 'RECOMMEND'" :key="release.release_title" :url="release.go_to_album"
-          :artist="release.by_artist" :cover="release.album_art" :title="release.release_title" fromItemtype="RECOMMEND">
+        <!-- <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
+          :title="release.title" :fromItemtype="itemtype">
+        </ReleaseCard> -->
+
+        <ReleaseCard :key="release.album_name" :url="release.album_url"
+          :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
+          :title="release.album_name" :fromItemtype="itemtype">
         </ReleaseCard>
       </div>
     </div>
+    <!-- <div :id="[this.elId]" v-else>
+      <div v-for="release, idx in releases" :key="idx">
+        <ReleaseCard :key="release.album_name" :url="release.album_url"
+          :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
+          :title="release.album_name" :fromItemtype="itemtype">
+        </ReleaseCard>
+      </div>
+    </div> -->
   </div>
 </template>
 
@@ -57,7 +71,7 @@ import { tns } from "../../node_modules/tiny-slider/src/tiny-slider";
 import { store } from './store';
 
 export default {
-  props: ['label_name', 'label_url', 'itemtype', 'faveData', 'sample_artist', 'page'],
+  props: ['followName', 'followUrl', 'itemtype', 'faveData', 'page', 'sampleForRec'],
   data() {
     return {
       releases: [],
@@ -67,17 +81,17 @@ export default {
   },
   async created() {
     if (this.itemtype === 'LABEL' || this.itemtype === 'ARTIST') {
-      this.getReleases(this.label_url);
+      this.getReleases(this.followUrl);
     }
-    if (this.itemtype === 'RECOMMEND') {
-      this.getRecommendations(this.label_url);
+    if (this.itemtype === 'RECS') {
+      this.getRecommendations(this.sampleForRec.album_url);
     }
   },
   mounted() {
     // Check whether the label/artist was recently added, and scroll there if so
     if (
-      store.newlyAddedUrl === this.label_url && this.itemtype === 'ARTIST' ||
-      store.newlyAddedUrl === this.label_url && this.itemtype === 'LABEL'
+      store.newlyAddedUrl === this.followUrl && this.itemtype === 'ARTIST' ||
+      store.newlyAddedUrl === this.followUrl && this.itemtype === 'LABEL'
     ) {
       const el = document.querySelector(`#${this.elId}`);
       const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
@@ -118,16 +132,18 @@ export default {
         },
       });
     }
-
   },
   watch: {
     faveData() {
-      this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+      if (this.itemtype === 'FAVES') {
+        this.releases = this.faveData;
+        this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+      }
     }
   },
   methods: {
     delButton() {
-      store.deleteLabel(this.label_url);
+      store.deleteLabel(this.followUrl);
     },
     getReleases(followedUrl) {
       const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
@@ -146,6 +162,7 @@ export default {
           return response.json();
         })
         .then((data) => {
+          console.log("data releases!!", data.releases);
           this.releases = data.releases;
         })
         .catch((error) => console.log(error));

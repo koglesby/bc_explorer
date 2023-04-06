@@ -6,18 +6,27 @@
     <div>
       <AlbumRecs v-if="currentPage === 1 && !!sampleForRec" :sampleForRec="sampleForRec"></AlbumRecs>
     </div> -->
+    <!-- 
+    <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
+    </ReleaseSlider> -->
 
-    <ReleaseSlider :page="currentPage" :faveData="faves" itemtype="FAVES">
-    </ReleaseSlider>
-
-    <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :label_name="sampleForRec.title"
-      :label_url="sampleForRec.url" :sample_artist="sampleForRec.artist" itemtype="RECOMMEND">
-    </ReleaseSlider>
-
-    <div v-for="(itemData) in orderedData" v-bind:key="itemData.url">
-      <ReleaseSlider :label_name="itemData.name" :label_url="itemData.url" :itemtype="itemData.itemtype">
+    <div>
+      <ReleaseSlider :page="currentPage" v-if="!!faves" :faveData="faves" itemtype="FAVES">
       </ReleaseSlider>
     </div>
+
+    <div>
+      <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
+      </ReleaseSlider>
+    </div>
+
+
+
+    <div v-for="(followData) in orderedData" v-bind:key="followData.url">
+      <ReleaseSlider :followName="followData.follow_name" :followUrl="followData.url" :itemtype="followData.itemtype">
+      </ReleaseSlider>
+    </div>
+
     <b-pagination class="pagination_nav_bar" v-model="currentPage" :total-rows="rows" :per-page="perPage"
       aria-controls="labels_list"></b-pagination>
   </div>
@@ -43,8 +52,8 @@ export default {
   },
   computed: {
     orderedData() {
-      // turns the firebaseLabelData into an array of objects, ordered aphabetically by the name property, excluding "The "
-      const lodashOrdered = _.orderBy(store.firebaseLabelData, item => item.name.toLowerCase().replace(/^the /, ""));
+      // turns the firebaseLabelData into an array of objects, ordered aphabetically by the follow_name property, excluding "The "
+      const lodashOrdered = _.orderBy(store.firebaseLabelData, item => item.follow_name.toLowerCase().replace(/^the /, ""));
       // return lodashOrdered;
       return lodashOrdered.slice((this.currentPage - 1) * this.perPage, this.currentPage * this.perPage);
     },
@@ -59,9 +68,6 @@ export default {
     }
   },
   watch: {
-    faves() {
-      this.componentKey += 1;
-    }
   },
   async created() {
     auth.onAuthStateChanged(user => {
