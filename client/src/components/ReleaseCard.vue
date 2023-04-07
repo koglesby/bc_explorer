@@ -72,7 +72,6 @@ export default {
       if (this.isFavorite) {
         this.store.unFavorite(this.url);
       } else {
-        console.log("releasecard this.url", this.url)
         this.store.addFavorite(this.url, this.artist, this.cover, this.title);
       }
     }

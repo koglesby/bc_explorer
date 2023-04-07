@@ -18,11 +18,9 @@
 
     <div>
       <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
-        <h2>Recommendations</h2>
+        <!-- <h2>Recommendations {{ this.sampleForRec.album_name }}</h2> -->
       </ReleaseSlider>
     </div>
-
-
 
     <div v-for="(followData) in orderedData" v-bind:key="followData.url">
       <ReleaseSlider :followName="followData.follow_name" :followUrl="followData.url" :itemtype="followData.itemtype">
@@ -49,7 +47,7 @@ export default {
       // store,
       currentPage: 1,
       perPage: 5,
-      componentKey: 0
+      componentKey: 0,
     };
   },
   computed: {
@@ -63,15 +61,18 @@ export default {
       return Object.keys(store.firebaseLabelData).length
     },
     faves() {
-      return _.toArray(store.firebaseFavorites);
+      return _.reverse(_.toArray(store.firebaseFavorites));
     },
     sampleForRec() {
-      return _.sample(_.toArray(store.firebaseFavorites));
+      return structuredClone(_.sample(_.toArray(store.firebaseFavorites)));
     }
   },
   watch: {
   },
   async created() {
+    // this.displayedData = structuredClone(this.currentData);
+
+
     auth.onAuthStateChanged(user => {
       if (!!user) {
         store.getLabelData(user);

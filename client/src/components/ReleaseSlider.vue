@@ -4,9 +4,9 @@
     <div class="row wrapper">
       <div class="followed-name col-5">
         <slot></slot>
-        <!-- <div v-if="itemtype === 'RECS'">
-          <h2>Based on liking <i>{{ this.fave.album_name }}</i> by {{ this.fave.artist_name }}</h2>
-        </div> -->
+        <div v-if="itemtype === 'RECS'">
+          <h2>Based on liking {{ this.something }}</h2>
+        </div>
         <!-- <div v-if="itemtype === 'FAVES'">
           <h2>Favorites</h2>
         </div> -->
@@ -32,8 +32,7 @@
       </li>
     </ul>
     <div :id="[this.elId]" v-if="itemtype === 'FAVES'">
-      <div v-for="release, idx in favies" :key="idx">
-
+      <div v-for="release, idx in faveData" :key="idx">
         <ReleaseCard :key="release.album_name" :url="release.album_url"
           :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
           :title="release.album_name" :fromItemtype="itemtype">
@@ -73,6 +72,7 @@ export default {
   data() {
     return {
       releases: [],
+      something: 'buh',
       elId: `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`,
       componentKey: Math.floor(Math.random() * 100) + Date.now()
     };
@@ -82,16 +82,17 @@ export default {
       this.getReleases(this.followUrl);
     }
     if (this.itemtype === 'RECS') {
-      this.getRecommendations(this.sampleyForRec.album_url);
+      console.log("recs releases", this.releases.length);
+      this.getRecommendations(this.sampleForRec.album_url);
     }
   },
   computed: {
-    favies() {
-      return _.toArray(store.firebaseFavorites);
-    },
-    sampleyForRec() {
-      return _.sample(_.toArray(store.firebaseFavorites));
-    }
+    // favies() {
+    //   return _.toArray(store.firebaseFavorites);
+    // },
+    // sampleyForRec() {
+    //   return _.sample(_.toArray(store.firebaseFavorites));
+    // }
   },
   mounted() {
     // Check whether the label/artist was recently added, and scroll there if so
@@ -106,6 +107,8 @@ export default {
   },
   updated() {
     // if (this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL') {
+    console.log("updated (samp, favedata)", this.sampleForRec, this.faveData);
+
     tns({
       container: `#${this.elId}`,
       lazyload: true,
@@ -141,21 +144,57 @@ export default {
   },
   watch: {
     faveData() {
-      // if (this.itemtype === 'FAVES' || this.itemtype === 'RECS') {
-      //   this.releases = this.faveData;
-      //   this.componentKey = Math.floor(Math.random() * 100) + Date.now();
-      // }
-    },
-    favies() {
       if (this.itemtype === 'FAVES') {
         this.componentKey = Math.floor(Math.random() * 100) + Date.now();
       }
     },
-    sampleyForRec() {
+    sampleForRec() {
       if (this.itemtype === 'RECS') {
-        this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+        //         tns({
+        //   container: `#${this.elId}`,
+        //   lazyload: true,
+        //   items: 4,
+        //   gutter: 10,
+        //   slideBy: "page",
+        //   controlsPosition: 'bottom',
+        //   navPosition: 'bottom',
+        //   mouseDrag: true,
+        //   autoplay: false,
+        //   autoplayButtonOutput: false,
+        //   controlsContainer: `#custom-control-${this.elId}`,
+        //   speed: 800,
+        //   loop: false,
+        //   nav: false,
+        //   responsive: {
+        //     0: {
+        //       items: 2,
+        //       nav: false,
+        //     },
+        //     768: {
+        //       items: 3,
+        //       nav: false,
+        //     },
+        //     1440: {
+        //       items: 5,
+        //       slideBy: 5,
+        //       nav: false,
+        //     },
+        //   },
+        // });
+        // this.getRecommendations(this.sampleForRec.album_url);
+        // this.componentKey = Math.floor(Math.random() * 100) + Date.now();
       }
-    }
+    },
+    // favies() {
+    //   if (this.itemtype === 'FAVES') {
+    //     this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+    //   }
+    // },
+    // sampleyForRec() {
+    //   if (this.itemtype === 'RECS') {
+    //     this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+    //   }
+    // }
   },
   methods: {
     delButton() {
@@ -183,7 +222,6 @@ export default {
         .catch((error) => console.log(error));
     },
     getRecommendations(sampleUrl) {
-      console.log("ReleaseSlider getRecs(sampleUrl)", sampleUrl);
       const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
       const url = base_url + "/get_recommended/";
       fetch(url, {
@@ -201,6 +239,7 @@ export default {
         })
         .then((data) => {
           this.releases = data.details;
+          this.something = this.sampleForRec.album_name;
         })
         .catch((error) => console.log(error));
     }
