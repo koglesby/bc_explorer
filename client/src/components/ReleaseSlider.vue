@@ -2,21 +2,22 @@
   <div class="container" :key="componentKey"
     v-if="this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL'">
     <div class="row wrapper">
-      <div class="followed-name" :class="itemtype === 'RECS' ? 'col-12' : 'col-5'">
+      <div class="followed-name col-5">
+        <slot></slot>
         <!-- <div v-if="itemtype === 'RECS'">
           <h2>Based on liking <i>{{ this.fave.album_name }}</i> by {{ this.fave.artist_name }}</h2>
         </div> -->
-        <div v-if="itemtype === 'FAVES'">
+        <!-- <div v-if="itemtype === 'FAVES'">
           <h2>Favorites</h2>
-        </div>
-        <div v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
+        </div> -->
+        <!-- <div v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
           <a :href="followUrl">
             <h2>{{ this.followName }}</h2>
           </a>
           <span>
             <h6>{{ this.itemtype }}</h6>
           </span>
-        </div>
+        </div> -->
       </div>
       <div class="col-2 offset-5 float-right" v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
         <b-button class="unfollow btn-lg float-right" variant="secondary" @click="delButton">Unfollow</b-button>
@@ -31,10 +32,7 @@
       </li>
     </ul>
     <div :id="[this.elId]" v-if="itemtype === 'FAVES'">
-      <div v-for="release, idx in faveData" :key="idx">
-        <!-- <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
-          :title="release.title" :fromItemtype="itemtype">
-        </ReleaseCard> -->
+      <div v-for="release, idx in favies" :key="idx">
 
         <ReleaseCard :key="release.album_name" :url="release.album_url"
           :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
@@ -84,59 +82,77 @@ export default {
       this.getReleases(this.followUrl);
     }
     if (this.itemtype === 'RECS') {
-      this.getRecommendations(this.sampleForRec.album_url);
+      this.getRecommendations(this.sampleyForRec.album_url);
+    }
+  },
+  computed: {
+    favies() {
+      return _.toArray(store.firebaseFavorites);
+    },
+    sampleyForRec() {
+      return _.sample(_.toArray(store.firebaseFavorites));
     }
   },
   mounted() {
     // Check whether the label/artist was recently added, and scroll there if so
-    if (
-      store.newlyAddedUrl === this.followUrl && this.itemtype === 'ARTIST' ||
-      store.newlyAddedUrl === this.followUrl && this.itemtype === 'LABEL'
-    ) {
-      const el = document.querySelector(`#${this.elId}`);
-      const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
+    // if (
+    //   store.newlyAddedUrl === this.followUrl && this.itemtype === 'ARTIST' ||
+    //   store.newlyAddedUrl === this.followUrl && this.itemtype === 'LABEL'
+    // ) {
+    //   const el = document.querySelector(`#${this.elId}`);
+    //   const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
+    //   window.scrollTo({ top: y, behavior: 'smooth' });
+    // }
   },
   updated() {
-    if (this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL') {
-      tns({
-        container: `#${this.elId}`,
-        lazyload: true,
-        items: 4,
-        gutter: 10,
-        slideBy: "page",
-        controlsPosition: 'bottom',
-        navPosition: 'bottom',
-        mouseDrag: true,
-        autoplay: false,
-        autoplayButtonOutput: false,
-        controlsContainer: `#custom-control-${this.elId}`,
-        speed: 800,
-        loop: false,
-        nav: false,
-        responsive: {
-          0: {
-            items: 2,
-            nav: false,
-          },
-          768: {
-            items: 3,
-            nav: false,
-          },
-          1440: {
-            items: 5,
-            slideBy: 5,
-            nav: false,
-          },
+    // if (this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL') {
+    tns({
+      container: `#${this.elId}`,
+      lazyload: true,
+      items: 4,
+      gutter: 10,
+      slideBy: "page",
+      controlsPosition: 'bottom',
+      navPosition: 'bottom',
+      mouseDrag: true,
+      autoplay: false,
+      autoplayButtonOutput: false,
+      controlsContainer: `#custom-control-${this.elId}`,
+      speed: 800,
+      loop: false,
+      nav: false,
+      responsive: {
+        0: {
+          items: 2,
+          nav: false,
         },
-      });
-    }
+        768: {
+          items: 3,
+          nav: false,
+        },
+        1440: {
+          items: 5,
+          slideBy: 5,
+          nav: false,
+        },
+      },
+    });
+    // }
   },
   watch: {
     faveData() {
+      // if (this.itemtype === 'FAVES' || this.itemtype === 'RECS') {
+      //   this.releases = this.faveData;
+      //   this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+      // }
+    },
+    favies() {
       if (this.itemtype === 'FAVES') {
-        this.releases = this.faveData;
+        this.componentKey = Math.floor(Math.random() * 100) + Date.now();
+      }
+    },
+    sampleyForRec() {
+      if (this.itemtype === 'RECS') {
         this.componentKey = Math.floor(Math.random() * 100) + Date.now();
       }
     }
@@ -162,12 +178,12 @@ export default {
           return response.json();
         })
         .then((data) => {
-          console.log("data releases!!", data.releases);
           this.releases = data.releases;
         })
         .catch((error) => console.log(error));
     },
     getRecommendations(sampleUrl) {
+      console.log("ReleaseSlider getRecs(sampleUrl)", sampleUrl);
       const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
       const url = base_url + "/get_recommended/";
       fetch(url, {

@@ -12,11 +12,13 @@
 
     <div>
       <ReleaseSlider :page="currentPage" v-if="!!faves" :faveData="faves" itemtype="FAVES">
+        <h2>Favorites</h2>
       </ReleaseSlider>
     </div>
 
     <div>
       <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
+        <h2>Recommendations</h2>
       </ReleaseSlider>
     </div>
 
