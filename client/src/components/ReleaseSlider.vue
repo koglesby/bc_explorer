@@ -41,24 +41,12 @@
     </div>
     <div :id="[this.elId]" v-else>
       <div v-for="release, idx in releases" :key="idx">
-        <!-- <ReleaseCard :key="release.title" :url="release.url" :artist="release.artist" :cover="release.cover"
-          :title="release.title" :fromItemtype="itemtype">
-        </ReleaseCard> -->
-
         <ReleaseCard :key="release.album_name" :url="release.album_url"
           :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
           :title="release.album_name" :fromItemtype="itemtype">
         </ReleaseCard>
       </div>
     </div>
-    <!-- <div :id="[this.elId]" v-else>
-      <div v-for="release, idx in releases" :key="idx">
-        <ReleaseCard :key="release.album_name" :url="release.album_url"
-          :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
-          :title="release.album_name" :fromItemtype="itemtype">
-        </ReleaseCard>
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -72,7 +60,7 @@ export default {
   data() {
     return {
       releases: [],
-      something: 'buh',
+      something: '',
       elId: `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`,
       componentKey: Math.floor(Math.random() * 100) + Date.now()
     };
@@ -82,33 +70,22 @@ export default {
       this.getReleases(this.followUrl);
     }
     if (this.itemtype === 'RECS') {
-      console.log("recs releases", this.releases.length);
       this.getRecommendations(this.sampleForRec.album_url);
     }
   },
-  computed: {
-    // favies() {
-    //   return _.toArray(store.firebaseFavorites);
-    // },
-    // sampleyForRec() {
-    //   return _.sample(_.toArray(store.firebaseFavorites));
-    // }
-  },
   mounted() {
     // Check whether the label/artist was recently added, and scroll there if so
-    // if (
-    //   store.newlyAddedUrl === this.followUrl && this.itemtype === 'ARTIST' ||
-    //   store.newlyAddedUrl === this.followUrl && this.itemtype === 'LABEL'
-    // ) {
-    //   const el = document.querySelector(`#${this.elId}`);
-    //   const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
-    //   window.scrollTo({ top: y, behavior: 'smooth' });
-    // }
+    if (
+      store.newlyAddedUrl === this.followUrl && this.itemtype === 'ARTIST' ||
+      store.newlyAddedUrl === this.followUrl && this.itemtype === 'LABEL'
+    ) {
+      const el = document.querySelector(`#${this.elId}`);
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
   },
   updated() {
     // if (this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL') {
-    console.log("updated (samp, favedata)", this.sampleForRec, this.faveData);
-
     tns({
       container: `#${this.elId}`,
       lazyload: true,
@@ -148,53 +125,6 @@ export default {
         this.componentKey = Math.floor(Math.random() * 100) + Date.now();
       }
     },
-    sampleForRec() {
-      if (this.itemtype === 'RECS') {
-        //         tns({
-        //   container: `#${this.elId}`,
-        //   lazyload: true,
-        //   items: 4,
-        //   gutter: 10,
-        //   slideBy: "page",
-        //   controlsPosition: 'bottom',
-        //   navPosition: 'bottom',
-        //   mouseDrag: true,
-        //   autoplay: false,
-        //   autoplayButtonOutput: false,
-        //   controlsContainer: `#custom-control-${this.elId}`,
-        //   speed: 800,
-        //   loop: false,
-        //   nav: false,
-        //   responsive: {
-        //     0: {
-        //       items: 2,
-        //       nav: false,
-        //     },
-        //     768: {
-        //       items: 3,
-        //       nav: false,
-        //     },
-        //     1440: {
-        //       items: 5,
-        //       slideBy: 5,
-        //       nav: false,
-        //     },
-        //   },
-        // });
-        // this.getRecommendations(this.sampleForRec.album_url);
-        // this.componentKey = Math.floor(Math.random() * 100) + Date.now();
-      }
-    },
-    // favies() {
-    //   if (this.itemtype === 'FAVES') {
-    //     this.componentKey = Math.floor(Math.random() * 100) + Date.now();
-    //   }
-    // },
-    // sampleyForRec() {
-    //   if (this.itemtype === 'RECS') {
-    //     this.componentKey = Math.floor(Math.random() * 100) + Date.now();
-    //   }
-    // }
   },
   methods: {
     delButton() {

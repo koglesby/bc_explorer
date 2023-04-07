@@ -24,6 +24,14 @@
 
     <div v-for="(followData) in orderedData" v-bind:key="followData.url">
       <ReleaseSlider :followName="followData.follow_name" :followUrl="followData.url" :itemtype="followData.itemtype">
+        <div>
+          <a :href="followData.url">
+            <h2>{{ followData.follow_name }}</h2>
+          </a>
+          <span>
+            <h6>{{ followData.itemtype }}</h6>
+          </span>
+        </div>
       </ReleaseSlider>
     </div>
 
@@ -70,9 +78,6 @@ export default {
   watch: {
   },
   async created() {
-    // this.displayedData = structuredClone(this.currentData);
-
-
     auth.onAuthStateChanged(user => {
       if (!!user) {
         store.getLabelData(user);
