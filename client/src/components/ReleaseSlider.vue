@@ -2,26 +2,31 @@
   <div class="container" :key="componentKey"
     v-if="this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL'">
     <div class="row wrapper">
-      <div class="followed-name col-5">
-        <slot></slot>
-        <div v-if="itemtype === 'RECS'">
-          <h2>Based on liking {{ this.something }}</h2>
+      <!-- Switch the header part of the component based on its type -->
+      <!-- Favorites -->
+      <div class="followed-name col-12" v-if="itemtype === 'FAVES' && this.releases.length > 0">
+        <h2>Favorites</h2>
+      </div>
+      <!-- Recommendations -->
+      <div class="followed-name col-12" v-if="this.itemtype === 'RECS'">
+        <h2>Based on <i>{{ this.albumName }}</i> by {{ this.artistName }}</h2>
+      </div>
+      <!-- Artist or Label (an item the user is following) -->
+      <Fragment v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
+        <div class="followed-name col-5">
+          <div>
+            <a :href="followUrl">
+              <h2>{{ this.followName }}</h2>
+            </a>
+            <span>
+              <h6>{{ this.itemtype }}</h6>
+            </span>
+          </div>
         </div>
-        <!-- <div v-if="itemtype === 'FAVES'">
-          <h2>Favorites</h2>
-        </div> -->
-        <!-- <div v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
-          <a :href="followUrl">
-            <h2>{{ this.followName }}</h2>
-          </a>
-          <span>
-            <h6>{{ this.itemtype }}</h6>
-          </span>
-        </div> -->
-      </div>
-      <div class="col-2 offset-5 float-right" v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
-        <b-button class="unfollow btn-lg float-right" variant="secondary" @click="delButton">Unfollow</b-button>
-      </div>
+        <div class="col-2 offset-5 float-right">
+          <b-button class="unfollow btn-lg float-right" variant="secondary" @click="delButton">Unfollow</b-button>
+        </div>
+      </Fragment>
     </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
       <li class="prev">
@@ -31,15 +36,7 @@
         <i class="fas fa-angle-right fa-2x"></i>
       </li>
     </ul>
-    <div :id="[this.elId]" v-if="itemtype === 'FAVES'">
-      <div v-for="release, idx in faveData" :key="idx">
-        <ReleaseCard :key="release.album_name" :url="release.album_url"
-          :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
-          :title="release.album_name" :fromItemtype="itemtype">
-        </ReleaseCard>
-      </div>
-    </div>
-    <div :id="[this.elId]" v-else>
+    <div :id="[this.elId]">
       <div v-for="release, idx in releases" :key="idx">
         <ReleaseCard :key="release.album_name" :url="release.album_url"
           :artist="itemtype === 'ARTIST' ? followName : release.artist_name" :cover="release.cover_img_url"
@@ -54,18 +51,21 @@
 import ReleaseCard from './ReleaseCard.vue';
 import { tns } from "../../node_modules/tiny-slider/src/tiny-slider";
 import { store } from './store';
+import { Fragment } from 'vue-fragment'
 
 export default {
   props: ['followName', 'followUrl', 'itemtype', 'faveData', 'page', 'sampleForRec'],
   data() {
     return {
       releases: [],
-      something: '',
+      albumName: '',
+      artistName: '',
       elId: `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`,
       componentKey: Math.floor(Math.random() * 100) + Date.now()
     };
   },
   async created() {
+    // Load the releases in the slider
     if (this.itemtype === 'LABEL' || this.itemtype === 'ARTIST') {
       this.getReleases(this.followUrl);
     }
@@ -85,45 +85,46 @@ export default {
     }
   },
   updated() {
-    // if (this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL') {
-    tns({
-      container: `#${this.elId}`,
-      lazyload: true,
-      items: 4,
-      gutter: 10,
-      slideBy: "page",
-      controlsPosition: 'bottom',
-      navPosition: 'bottom',
-      mouseDrag: true,
-      autoplay: false,
-      autoplayButtonOutput: false,
-      controlsContainer: `#custom-control-${this.elId}`,
-      speed: 800,
-      loop: false,
-      nav: false,
-      responsive: {
-        0: {
-          items: 2,
-          nav: false,
+    // Call tiny-slider for Favorites and Recommendations on page 1 only
+    if (this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL') {
+      tns({
+        container: `#${this.elId}`,
+        lazyload: true,
+        items: 4,
+        gutter: 10,
+        slideBy: "page",
+        controlsPosition: 'bottom',
+        navPosition: 'bottom',
+        mouseDrag: true,
+        autoplay: false,
+        autoplayButtonOutput: false,
+        controlsContainer: `#custom-control-${this.elId}`,
+        speed: 800,
+        loop: false,
+        nav: false,
+        responsive: {
+          0: {
+            items: 2,
+            nav: false,
+          },
+          768: {
+            items: 3,
+            nav: false,
+          },
+          1440: {
+            items: 5,
+            slideBy: 5,
+            nav: false,
+          },
         },
-        768: {
-          items: 3,
-          nav: false,
-        },
-        1440: {
-          items: 5,
-          slideBy: 5,
-          nav: false,
-        },
-      },
-    });
-    // }
+      });
+    }
   },
   watch: {
     faveData() {
-      if (this.itemtype === 'FAVES') {
-        this.componentKey = Math.floor(Math.random() * 100) + Date.now();
-      }
+      // when the favorites data changes, re-render the component for it
+      this.releases = this.faveData;
+      this.componentKey = Math.floor(Math.random() * 100) + Date.now();
     },
   },
   methods: {
@@ -169,12 +170,13 @@ export default {
         })
         .then((data) => {
           this.releases = data.details;
-          this.something = this.sampleForRec.album_name;
+          this.albumName = this.sampleForRec.album_name;
+          this.artistName = this.sampleForRec.artist_name;
         })
         .catch((error) => console.log(error));
     }
   },
-  components: { ReleaseCard },
+  components: { ReleaseCard, Fragment },
 };
 </script>
 

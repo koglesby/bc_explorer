@@ -1,37 +1,17 @@
 <template>
   <div class="h-screen p-2 rounded">
-    <!-- <div>
-      <Favorites :page="currentPage"></Favorites>
-    </div>
-    <div>
-      <AlbumRecs v-if="currentPage === 1 && !!sampleForRec" :sampleForRec="sampleForRec"></AlbumRecs>
-    </div> -->
-    <!-- 
-    <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
-    </ReleaseSlider> -->
-
     <div>
       <ReleaseSlider :page="currentPage" v-if="!!faves" :faveData="faves" itemtype="FAVES">
-        <h2>Favorites</h2>
       </ReleaseSlider>
     </div>
 
     <div>
       <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
-        <!-- <h2>Recommendations {{ this.sampleForRec.album_name }}</h2> -->
       </ReleaseSlider>
     </div>
 
     <div v-for="(followData) in orderedData" v-bind:key="followData.url">
       <ReleaseSlider :followName="followData.follow_name" :followUrl="followData.url" :itemtype="followData.itemtype">
-        <div>
-          <a :href="followData.url">
-            <h2>{{ followData.follow_name }}</h2>
-          </a>
-          <span>
-            <h6>{{ followData.itemtype }}</h6>
-          </span>
-        </div>
       </ReleaseSlider>
     </div>
 
@@ -69,7 +49,7 @@ export default {
       return Object.keys(store.firebaseLabelData).length
     },
     faves() {
-      return _.reverse(_.toArray(store.firebaseFavorites));
+      return structuredClone(_.reverse(_.toArray(store.firebaseFavorites)));
     },
     sampleForRec() {
       return structuredClone(_.sample(_.toArray(store.firebaseFavorites)));
