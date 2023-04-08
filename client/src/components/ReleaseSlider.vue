@@ -9,13 +9,23 @@
       </div>
       <!-- Recommendations -->
       <div class="followed-name col-12" v-if="this.itemtype === 'RECS'">
-        <h2>Based on <i>{{ this.albumName }}</i> by {{ this.artistName }}</h2>
+        <h2>Recommendations</h2>
+        <h3>
+          Based on
+          <a target="_blank" :href="this.albumUrl">
+            <i>{{ this.albumName }}</i>
+          </a>
+          by
+          <a :href="this.artistUrl">
+            {{ this.artistName }}
+          </a>
+        </h3>
       </div>
       <!-- Artist or Label (an item the user is following) -->
       <Fragment v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'">
         <div class="followed-name col-5">
           <div>
-            <a :href="followUrl">
+            <a :href="followUrl" target="_blank">
               <h2>{{ this.followName }}</h2>
             </a>
             <span>
@@ -60,6 +70,8 @@ export default {
       releases: [],
       albumName: '',
       artistName: '',
+      artistUrl: '',
+      albumUrl: '',
       elId: `elId-${Date.now()}` + `${Math.floor(Math.random() * 100)}`,
       componentKey: Math.floor(Math.random() * 100) + Date.now()
     };
@@ -155,6 +167,12 @@ export default {
     getRecommendations(sampleUrl) {
       const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
       const url = base_url + "/get_recommended/";
+
+      this.albumName = this.sampleForRec.album_name;
+      this.artistName = this.sampleForRec.artist_name;
+      this.albumUrl = this.sampleForRec.album_url;
+      this.artistUrl = this.albumUrl.replace(/\.com\/.*/, '.com');
+
       fetch(url, {
         method: 'POST',
         headers: new Headers({
@@ -170,8 +188,6 @@ export default {
         })
         .then((data) => {
           this.releases = data.details;
-          this.albumName = this.sampleForRec.album_name;
-          this.artistName = this.sampleForRec.artist_name;
         })
         .catch((error) => console.log(error));
     }
