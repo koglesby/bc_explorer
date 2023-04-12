@@ -2,13 +2,14 @@
   <div class="card bg-light mb-3" style="height:max-content; border: 0px">
     <a :href="url" target="_blank">
       <img class="img-fluid tns-lazy-img" style="width: 100%;" :data-src="cover" alt="Cover image cap">
-      <div class="card-body">
-        <h5 v-if="fromItemtype !== 'ARTIST'" class="card-title text-truncate" style="color: black">{{ artist }}</h5>
-        <p class="card-text text-truncate" style="color: black">{{ title }}</p>
-        <p v-if="openDetails && !loadingDetails" class="card-text text-truncate" style="color: black">{{ releaseDate }}
-        </p>
-      </div>
+      <h5 class="card-text text-truncate" style="color: black">{{ title }}</h5>
     </a>
+
+    <h6 v-if="fromItemtype !== 'ARTIST'" class="card-title text-truncate" style="color: black">by <a
+        :href="url.replace(/\.com\/.*/, '.com')" target="_blank">{{ artist }}</a></h6>
+    <p v-if="openDetails && !loadingDetails" class="card-text text-truncate" style="color: black">{{ releaseDate }}
+    </p>
+
     <div style="display: flex; justify-content: space-around">
       <i v-if="!openDetails && !loadingDetails" class="fas fa-caret-down info-icon" @click="getReleaseDetails()"></i>
       <i v-if="openDetails && !loadingDetails" class="fas fa-caret-up info-icon" @click="showLess()"></i>

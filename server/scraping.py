@@ -237,23 +237,12 @@ def scrape_recommended(release_url):
                 go_to_album)._replace(query=None).geturl()
 
             # create an object for the extracted information
-            # info_object = {
-            #     'album_art': new_string,
-            #     'release_title': release_title,
-            #     'by_artist': artist,
-            #     'go_to_album': href_without_querystring
-            # }
             info_object = {
                 'cover_img_url': new_string,
                 'album_name': release_title,
                 'artist_name': artist,
                 'album_url': href_without_querystring
             }
-
-        #     <ReleaseCard v-if="itemtype === 'ARTIST' || itemtype === 'LABEL'" :key="release.album_name"
-        #   :url="release.album_url" :artist="itemtype === 'ARTIST' ? label_name : release.artist_name"
-        #   :cover="release.cover_img_url" :title="release.album_name" :fromItemtype="itemtype">
-        # </ReleaseCard>
 
             # append the object to the list of extracted information
             extracted_info.append(info_object)

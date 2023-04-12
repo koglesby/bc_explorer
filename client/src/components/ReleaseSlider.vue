@@ -1,10 +1,9 @@
 <template>
-  <div class="container" :key="componentKey"
-    v-if="this.page === 1 || this.itemtype === 'ARTIST' || this.itemtype === 'LABEL'">
+  <div class="container" :key="componentKey" v-if="this.toDisplay()">
     <div class="row wrapper">
       <!-- Switch the header part of the component based on its type -->
       <!-- Favorites -->
-      <div class="followed-name col-12" v-if="itemtype === 'FAVES' && this.releases.length > 0">
+      <div class="followed-name col-12" v-if="itemtype === 'FAVES'">
         <h2>Favorites</h2>
       </div>
       <!-- Recommendations -->
@@ -16,7 +15,7 @@
             <i>{{ this.albumName }}</i>
           </a>
           by
-          <a :href="this.artistUrl">
+          <a :href="this.artistUrl" target="_blank">
             {{ this.artistName }}
           </a>
         </h3>
@@ -40,10 +39,10 @@
     </div>
     <ul class="control" :id="['custom-control-' + this.elId]">
       <li class="prev">
-        <i class="fas fa-angle-left fa-2x"></i>
+        <i class="fas fa-chevron-left fa-2x"></i>
       </li>
       <li class="next">
-        <i class="fas fa-angle-right fa-2x"></i>
+        <i class="fas fa-chevron-right fa-2x"></i>
       </li>
     </ul>
     <div :id="[this.elId]">
@@ -77,7 +76,7 @@ export default {
     };
   },
   async created() {
-    // Load the releases in the slider
+    // // Load the releases in the slider
     if (this.itemtype === 'LABEL' || this.itemtype === 'ARTIST') {
       this.getReleases(this.followUrl);
     }
@@ -140,6 +139,23 @@ export default {
     },
   },
   methods: {
+    toDisplay() {
+      const expr = this.itemtype;
+      let retval = null;
+      switch (expr) {
+        case 'RECS':
+        case 'FAVES':
+          retval = this.page === 1
+          break;
+        case 'ARTIST':
+        case 'LABEL':
+          retval = !!this.releases;
+          break;
+        default:
+          return false;
+      }
+      return retval;
+    },
     delButton() {
       store.deleteLabel(this.followUrl);
     },
@@ -236,25 +252,6 @@ h1 {
 
 .control li.next {
   right: 20px;
-}
-
-.tns-nav {
-  text-align: center;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-
-.tns-nav button {
-  height: 13px;
-  width: 8px;
-  background-color: #a5a5a5;
-  border: none;
-  margin-left: 7px;
-  border-radius: 50%;
-}
-
-.tns-nav .tns-nav-active {
-  background-color: black;
 }
 
 .followed-name {

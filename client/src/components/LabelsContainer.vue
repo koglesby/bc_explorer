@@ -1,17 +1,19 @@
 <template>
-  <div class="h-screen p-2 rounded">
+  <div class="h-screen p-2 rounded" v-if="this.loggedIn">
     <div>
-      <ReleaseSlider :page="currentPage" v-if="!!faves" :faveData="faves" itemtype="FAVES">
+      <ReleaseSlider :page="currentPage" :faveData="faves" itemtype="FAVES">
       </ReleaseSlider>
     </div>
     <div>
       <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
       </ReleaseSlider>
     </div>
+
     <div v-for="(followData) in orderedData" v-bind:key="followData.url">
       <ReleaseSlider :followName="followData.follow_name" :followUrl="followData.url" :itemtype="followData.itemtype">
       </ReleaseSlider>
     </div>
+
     <b-pagination class="pagination_nav_bar" v-model="currentPage" :total-rows="rows" :per-page="perPage"
       aria-controls="labels_list"></b-pagination>
   </div>
@@ -30,6 +32,7 @@ export default {
       currentPage: 1,
       perPage: 5,
       componentKey: 0,
+      loggedIn: null
     };
   },
   computed: {
@@ -49,16 +52,15 @@ export default {
       return _.sample(_.toArray(store.firebaseFavorites));
     }
   },
-  watch: {
-  },
   async created() {
     auth.onAuthStateChanged(user => {
       if (!!user) {
         store.getLabelData(user);
         store.fetchUser(user);
       }
+      this.loggedIn = store.user.loggedIn;
     })
-
+    this.loggedIn = store.user.loggedIn;
     // const { list, containerProps, wrapperProps } = useVirtualList(this.orderedData, {
     //   itemHeight: 96,
     // });
