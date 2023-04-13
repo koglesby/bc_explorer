@@ -10,10 +10,18 @@
       </ReleaseSlider>
     </div>
 
+    <div class="container" v-if="orderedData.length > 0">
+      <div class="row wrapper">
+        <div class="col-12">
+          <h2>Following</h2>
+        </div>
+      </div>
+    </div>
     <div v-for="(followData) in orderedData" v-bind:key="followData.url">
       <ReleaseSlider :followName="followData.follow_name" :followUrl="followData.url" :itemtype="followData.itemtype">
       </ReleaseSlider>
     </div>
+
 
     <b-pagination class="pagination_nav_bar" v-model="currentPage" :total-rows="rows" :per-page="perPage"
       aria-controls="labels_list"></b-pagination>
