@@ -1,5 +1,5 @@
 <template>
-  <div class="container" :key="componentKey" v-if="this.toDisplay()">
+  <div class="container" :key="componentKey">
     <div class="row wrapper">
       <!-- Switch the header part of the component based on its type -->
       <!-- Favorites -->
@@ -85,6 +85,9 @@ export default {
     }
   },
   mounted() {
+    if (this.itemtype === 'FAVES') {
+      this.releases = this.faveData;
+    }
     // Check whether the label/artist was recently added, and scroll there if so
     if (
       store.newlyAddedUrl === this.followUrl && this.itemtype === 'ARTIST' ||
@@ -139,23 +142,6 @@ export default {
     },
   },
   methods: {
-    toDisplay() {
-      const expr = this.itemtype;
-      let retval = null;
-      switch (expr) {
-        case 'RECS':
-        case 'FAVES':
-          retval = this.page === 1
-          break;
-        case 'ARTIST':
-        case 'LABEL':
-          retval = !!this.releases;
-          break;
-        default:
-          return false;
-      }
-      return retval;
-    },
     delButton() {
       store.deleteLabel(this.followUrl);
     },

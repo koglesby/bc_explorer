@@ -1,11 +1,12 @@
 <template>
   <div class="h-screen p-2 rounded" v-if="this.loggedIn">
-    <div>
+    <div v-if="displayFaves && currentPage === 1">
       <ReleaseSlider :page="currentPage" :faveData="faves" itemtype="FAVES">
       </ReleaseSlider>
     </div>
-    <div>
-      <ReleaseSlider :page="currentPage" v-if="!!sampleForRec" :sampleForRec="sampleForRec" itemtype="RECS">
+
+    <div v-if="!!sampleForRec && currentPage === 1">
+      <ReleaseSlider :page="currentPage" :sampleForRec="sampleForRec" itemtype="RECS">
       </ReleaseSlider>
     </div>
 
@@ -31,8 +32,9 @@ export default {
     return {
       currentPage: 1,
       perPage: 5,
-      componentKey: 0,
-      loggedIn: null
+      compKey: 0,
+      loggedIn: null,
+      displayFaves: false
     };
   },
   computed: {
@@ -65,6 +67,11 @@ export default {
     //   itemHeight: 96,
     // });
 
+  },
+  watch: {
+    faves() {
+      this.displayFaves = this.faves.length !== 0;
+    }
   },
   components: { ReleaseSlider }
 }
