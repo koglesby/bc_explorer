@@ -63,7 +63,7 @@ import { store } from './store';
 import { Fragment } from 'vue-fragment'
 
 export default {
-  props: ['followName', 'followUrl', 'itemtype', 'faveData', 'page', 'sampleForRec'],
+  props: ['followName', 'followUrl', 'itemtype', 'faveData', 'page', 'sampleForRec', 'recReleases'],
   data() {
     return {
       releases: [],
@@ -80,13 +80,17 @@ export default {
     if (this.itemtype === 'LABEL' || this.itemtype === 'ARTIST') {
       this.getReleases(this.followUrl);
     }
-    if (this.itemtype === 'RECS') {
-      this.getRecommendations(this.sampleForRec.album_url);
-    }
   },
   mounted() {
     if (this.itemtype === 'FAVES') {
       this.releases = this.faveData;
+    }
+    if (this.itemtype === 'RECS') {
+      this.albumName = this.sampleForRec.album_name;
+      this.artistName = this.sampleForRec.artist_name;
+      this.albumUrl = this.sampleForRec.album_url;
+      this.artistUrl = this.albumUrl.replace(/\.com\/.*/, '.com');
+      this.releases = this.recReleases;
     }
     // Check whether the label/artist was recently added, and scroll there if so
     if (
@@ -166,33 +170,6 @@ export default {
         })
         .catch((error) => console.log(error));
     },
-    getRecommendations(sampleUrl) {
-      const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
-      const url = base_url + "/get_recommended/";
-
-      this.albumName = this.sampleForRec.album_name;
-      this.artistName = this.sampleForRec.artist_name;
-      this.albumUrl = this.sampleForRec.album_url;
-      this.artistUrl = this.albumUrl.replace(/\.com\/.*/, '.com');
-
-      fetch(url, {
-        method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({
-          url: sampleUrl
-        })
-      })
-        .then((response) => {
-          if (!response.ok) throw Error(response.statusText);
-          return response.json();
-        })
-        .then((data) => {
-          this.releases = data.details;
-        })
-        .catch((error) => console.log(error));
-    }
   },
   components: { ReleaseCard, Fragment },
 };

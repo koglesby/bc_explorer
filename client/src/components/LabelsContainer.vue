@@ -1,12 +1,12 @@
 <template>
   <div class="h-screen p-2 rounded" v-if="this.loggedIn">
-    <div v-if="displayFaves && currentPage === 1">
+    <div v-if="faves.length !== 0 && currentPage === 1">
       <ReleaseSlider :page="currentPage" :faveData="faves" itemtype="FAVES">
       </ReleaseSlider>
     </div>
 
-    <div v-if="!!sampleForRec && currentPage === 1">
-      <ReleaseSlider :page="currentPage" :sampleForRec="sampleForRec" itemtype="RECS">
+    <div v-if="recReleases.length > 0 && currentPage === 1">
+      <ReleaseSlider :recReleases="this.recReleases" :page="currentPage" :sampleForRec="sampleForRec" itemtype="RECS">
       </ReleaseSlider>
     </div>
 
@@ -34,7 +34,8 @@ export default {
       perPage: 5,
       compKey: 0,
       loggedIn: null,
-      displayFaves: false
+      displayFaves: false,
+      recReleases: [],
     };
   },
   computed: {
@@ -63,14 +64,46 @@ export default {
       this.loggedIn = store.user.loggedIn;
     })
     this.loggedIn = store.user.loggedIn;
+
     // const { list, containerProps, wrapperProps } = useVirtualList(this.orderedData, {
     //   itemHeight: 96,
     // });
+  },
+  mounted() {
 
   },
   watch: {
     faves() {
       this.displayFaves = this.faves.length !== 0;
+    },
+    sampleForRec() {
+      if (this.recReleases.length === 0) {
+        this.getRecommendations(this.sampleForRec.album_url);
+      }
+    }
+  },
+  methods: {
+    getRecommendations(sampleUrl) {
+      const base_url = process.env.NODE_ENV === "development" ? 'http://127.0.0.1:5000/' : '';
+      const url = base_url + "/get_recommended/";
+
+      fetch(url, {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          url: sampleUrl
+        })
+      })
+        .then((response) => {
+          if (!response.ok) throw Error(response.statusText);
+          return response.json();
+        })
+        .then((data) => {
+          this.recReleases = data.details;
+        })
+        .catch((error) => console.log(error));
     }
   },
   components: { ReleaseSlider }
